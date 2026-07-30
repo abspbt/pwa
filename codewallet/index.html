@@ -132,8 +132,8 @@
       </div>
       
       <!-- Barcode Container with Adequate Quiet Zone -->
-      <div class="bg-white p-3 rounded-lg flex flex-col items-center justify-center min-h-[94px]">
-        <svg id="carrier-barcode-svg" class="w-full h-[82px] max-h-[82px]"></svg>
+      <div class="bg-white p-3 rounded-lg flex flex-col items-center justify-center min-h-[96px]">
+        <svg id="carrier-barcode-svg" class="w-full h-[84px] max-h-[84px]"></svg>
       </div>
     </div>
 
@@ -397,11 +397,11 @@
       try {
         JsBarcode("#carrier-barcode-svg", appData.carrier || "/AB12345", {
           format: appData.carrierType || "CODE39",
-          width: 2.1,
-          height: 73,
+          width: 2.2,
+          height: 75,
           displayValue: true,
           fontSize: 12,
-          margin: 0,
+          margin: 6,
           background: "#ffffff",
           lineColor: "#000000"
         });
@@ -410,11 +410,11 @@
         try {
           JsBarcode("#carrier-barcode-svg", appData.carrier || "/AB12345", {
             format: "CODE128",
-            width: 1.7,
-            height: 43,
+            width: 1.8,
+            height: 45,
             displayValue: true,
             fontSize: 10,
-            margin: 0
+            margin: 4
           });
         } catch(e){}
       }
