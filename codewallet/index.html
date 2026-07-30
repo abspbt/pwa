@@ -109,12 +109,11 @@
         <span class="font-bold text-xs tracking-wider uppercase text-[#9CA9A5]">會員卡隨身包</span>
       </div>
       <div class="flex items-center space-x-2">
-        <button onclick="openPwaGuideModal()" class="text-xs px-2.5 py-1 rounded-full bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#9CA9A5] hover:text-white transition-colors flex items-center gap-1 font-medium">
-          <i class="fa-solid fa-cloud-arrow-down"></i>
-          <span>PWA/部署</span>
-        </button>
-        <button onclick="openStoreManageModal()" class="w-8 h-8 rounded-full bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#9CA9A5] hover:text-white transition-colors flex items-center justify-center">
-          <i class="fa-solid fa-gear text-sm"></i>
+        <button onclick="openStoreManageModal()" class="flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#9CA9A5] hover:text-white transition-colors">
+          <span class="text-xs font-medium">設定</span>
+          <span class="w-6 h-6 flex items-center justify-center">
+            <i class="fa-solid fa-gear text-sm"></i>
+          </span>
         </button>
       </div>
     </div>
@@ -133,8 +132,8 @@
       </div>
       
       <!-- Barcode Container with Adequate Quiet Zone -->
-      <div class="bg-white p-3 rounded-lg flex flex-col items-center justify-center min-h-[110px]">
-        <svg id="carrier-barcode-svg" class="w-full h-24 max-h-24"></svg>
+      <div class="bg-white p-3 rounded-lg flex flex-col items-center justify-center min-h-[104px]">
+        <svg id="carrier-barcode-svg" class="w-full h-[91px] max-h-[91px]"></svg>
       </div>
     </div>
 
@@ -327,71 +326,6 @@
     </div>
   </div>
 
-  <!-- MODAL C: PWA & GitHub Pages Deployment Guide Modal -->
-  <div id="pwa-guide-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden backdrop-blur-xs">
-    <div class="bg-[#F5F1E8] w-full max-w-md rounded-2xl p-5 shadow-xl border border-[#A0A29C] max-h-[90vh] flex flex-col">
-      <div class="flex justify-between items-center mb-3 border-b border-[#A0A29C]/30 pb-2 shrink-0">
-        <h2 class="text-base font-bold text-[#4A4A47] flex items-center gap-2">
-          <i class="fa-brands fa-github"></i> GitHub Pages 與 PWA 部署指南
-        </h2>
-        <button onclick="closePwaGuideModal()" class="text-[#9CA9A5] hover:text-[#4A4A47] text-lg font-bold px-2">✕</button>
-      </div>
-
-      <div class="overflow-y-auto flex-1 space-y-4 text-xs text-[#4A4A47] pr-1">
-        <div class="bg-white p-3 rounded-xl border border-[#A0A29C]/30">
-          <h3 class="font-bold mb-1 text-sm text-[#4A4A47]">1. 專案檔案結構</h3>
-          <p class="text-[11px] text-[#4A4A47]/80 mb-2">部署至 GitHub Pages 前，請確保 Repository 包含以下檔案：</p>
-          <ul class="list-disc list-inside space-y-1 text-[11px] font-mono bg-[#F5F1E8] p-2 rounded">
-            <li>index.html (主程式畫面)</li>
-            <li>manifest.json (PWA 描述檔)</li>
-            <li>sw.js (Service Worker 離線快取)</li>
-            <li>.nojekyll (避免 GitHub Pages 誤用 Jekyll 處理)</li>
-          </ul>
-        </div>
-
-        <!-- 1-Click File Exporters -->
-        <div class="bg-white p-3 rounded-xl border border-[#A0A29C]/30 space-y-2">
-          <h3 class="font-bold text-sm text-[#4A4A47]">2. 一鍵匯出 PWA 部署資產</h3>
-          <p class="text-[11px] text-[#4A4A47]/80">點擊下方按鈕可直接下載 PWA 部署所需的設定檔：</p>
-          <div class="grid grid-cols-2 gap-2 pt-1">
-            <button onclick="downloadManifestJson()" class="p-2 bg-[#E5E1D6] hover:bg-[#9CA9A5] hover:text-white rounded-lg text-left transition-colors">
-              <span class="block font-bold">manifest.json</span>
-              <span class="text-[10px] opacity-80">下載 PWA 描述檔</span>
-            </button>
-            <button onclick="downloadSwJs()" class="p-2 bg-[#E5E1D6] hover:bg-[#9CA9A5] hover:text-white rounded-lg text-left transition-colors">
-              <span class="block font-bold">sw.js</span>
-              <span class="text-[10px] opacity-80">下載 Service Worker</span>
-            </button>
-            <button onclick="downloadNoJekyll()" class="p-2 bg-[#E5E1D6] hover:bg-[#9CA9A5] hover:text-white rounded-lg text-left transition-colors">
-              <span class="block font-bold">.nojekyll</span>
-              <span class="text-[10px] opacity-80">下載 空檔</span>
-            </button>
-            <button onclick="copyManifestSnippet()" class="p-2 bg-[#E5E1D6] hover:bg-[#9CA9A5] hover:text-white rounded-lg text-left transition-colors">
-              <span class="block font-bold"><i class="fa-solid fa-copy"></i> 複製設定內容</span>
-              <span class="text-[10px] opacity-80">複製到剪貼簿</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="bg-white p-3 rounded-xl border border-[#A0A29C]/30">
-          <h3 class="font-bold mb-1 text-sm text-[#4A4A47]">3. GitHub Pages 部署 4 步驟</h3>
-          <ol class="list-decimal list-inside space-y-1 text-[11px] text-[#4A4A47]/90">
-            <li>建立一個全新的 GitHub Repository（例: <code class="bg-gray-100 px-1 rounded">my-barcode-pwa</code>）。</li>
-            <li>將 <code class="bg-gray-100 px-1 rounded">index.html</code>、<code class="bg-gray-100 px-1 rounded">manifest.json</code>、<code class="bg-gray-100 px-1 rounded">sw.js</code> 與 <code class="bg-gray-100 px-1 rounded">.nojekyll</code> 上傳至 Repository。</li>
-            <li>前往 Repository 的 <strong>Settings → Pages</strong>。</li>
-            <li>Build and deployment 選擇 <strong>Deploy from a branch</strong>，Branch 選擇 <code class="bg-gray-100 px-1 rounded">main / root</code> 並儲存。稍等 1 分鐘即可取得 PWA 專屬網址！</li>
-          </ol>
-        </div>
-      </div>
-
-      <div class="mt-4 pt-2 border-t border-[#A0A29C]/30 text-right shrink-0">
-        <button onclick="closePwaGuideModal()" class="px-4 py-1.5 text-xs bg-[#9CA9A5] text-white font-bold rounded-lg hover:bg-[#4A4A47]">
-          我知道了
-        </button>
-      </div>
-    </div>
-  </div>
-
   <script>
     /* Global Storage Key & Initial Preset Data */
     const STORAGE_KEY = 'pwa_barcode_wallet_v2';
@@ -416,24 +350,10 @@
           barcodeType: "CODE128",
         },
         {
-          id: "store-px",
+          id: "store-poya",
           order: 3,
-          storeName: "全聯福利中心",
-          barcodeValue: "PX20001111222",
-          barcodeType: "CODE128",
-        },
-        {
-          id: "store-carrefour",
-          order: 4,
-          storeName: "家樂福",
-          barcodeValue: "CF33334444555",
-          barcodeType: "QR_CODE",
-        },
-        {
-          id: "store-mos",
-          order: 5,
-          storeName: "摩斯漢堡",
-          barcodeValue: "MOS777666555",
+          storeName: "寶雅",
+          barcodeValue: "PY55556666777",
           barcodeType: "CODE128",
         }
       ]
@@ -477,10 +397,10 @@
       try {
         JsBarcode("#carrier-barcode-svg", appData.carrier || "/AB12345", {
           format: appData.carrierType || "CODE39",
-          width: 2.4,
-          height: 85,
+          width: 2.3,
+          height: 81,
           displayValue: true,
-          fontSize: 14,
+          fontSize: 13,
           margin: 0,
           background: "#ffffff",
           lineColor: "#000000"
@@ -490,10 +410,10 @@
         try {
           JsBarcode("#carrier-barcode-svg", appData.carrier || "/AB12345", {
             format: "CODE128",
-            width: 2,
-            height: 50,
+            width: 1.9,
+            height: 48,
             displayValue: true,
-            fontSize: 12,
+            fontSize: 11,
             margin: 0
           });
         } catch(e){}
@@ -898,15 +818,7 @@
       reader.readAsText(file);
     }
 
-    /* PWA Modal and Exporters */
-    function openPwaGuideModal() {
-      document.getElementById('pwa-guide-modal').classList.remove('hidden');
-    }
-
-    function closePwaGuideModal() {
-      document.getElementById('pwa-guide-modal').classList.add('hidden');
-    }
-
+    /* File Download Helper (still used internally, e.g. data export) */
     function downloadFile(filename, text) {
       const element = document.createElement('a');
       element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
