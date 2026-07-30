@@ -124,8 +124,8 @@
       </div>
       
       <!-- Barcode Container with Adequate Quiet Zone -->
-      <div class="bg-white p-2 rounded-lg flex flex-col items-center justify-center min-h-[70px]">
-        <svg id="carrier-barcode-svg" class="w-full h-16 max-h-16"></svg>
+      <div class="bg-white p-3 rounded-lg flex flex-col items-center justify-center min-h-[110px]">
+        <svg id="carrier-barcode-svg" class="w-full h-24 max-h-24"></svg>
       </div>
     </div>
 
@@ -147,18 +147,6 @@
       </div>
     </div>
 
-    <!-- 3. Segmented Control (會員條碼 / 點數折抵 分頁切換) -->
-    <div class="shrink-0 mb-3 px-1">
-      <div class="bg-[#E5E1D6] p-1 rounded-xl flex items-center relative">
-        <button id="tab-member-btn" onclick="switchTab('member')" class="segmented-pill flex-1 py-2 text-center text-xs rounded-lg font-bold transition-all duration-200 z-10">
-          <i class="fa-solid fa-id-card mr-1"></i>會員條碼
-        </button>
-        <button id="tab-points-btn" onclick="switchTab('points')" class="segmented-pill flex-1 py-2 text-center text-xs rounded-lg font-bold transition-all duration-200 z-10">
-          <i class="fa-solid fa-coins mr-1"></i>點數折抵
-        </button>
-      </div>
-    </div>
-
     <!-- Content Card Wrapper -->
     <div class="flex-1 flex flex-col justify-between bg-white rounded-2xl p-4 shadow-sm border border-[#A0A29C]/30 min-h-0 mb-3">
       
@@ -169,7 +157,7 @@
         </h1>
       </div>
 
-      <!-- 5. Dynamic Barcode Area (顯示會員條碼或點數條碼 + 卡號) -->
+      <!-- 4. Dynamic Barcode Area (顯示會員條碼 + 卡號) -->
       <div class="flex-1 flex flex-col items-center justify-center my-2 min-h-[160px] relative">
         <!-- SVG Barcode element for Linear formats (Code128, EAN, etc) -->
         <div id="linear-barcode-wrapper" class="w-full flex flex-col items-center justify-center">
@@ -181,12 +169,12 @@
           <div id="qrcode-canvas-container"></div>
         </div>
 
-        <!-- Empty State Prompt if Points barcode is missing -->
+        <!-- Empty State Prompt if member barcode is missing -->
         <div id="empty-barcode-state" class="hidden flex flex-col items-center justify-center text-center p-4">
           <i class="fa-solid fa-circle-exclamation text-3xl text-[#9CA9A5] mb-2"></i>
-          <p class="text-xs text-[#4A4A47] font-medium">本店家尚未設定點數折抵條碼</p>
-          <button onclick="openAddBarcodeModalForPoints()" class="mt-2 text-xs text-white bg-[#9CA9A5] px-3 py-1.5 rounded-lg hover:bg-[#4A4A47] transition-colors">
-            + 新增點數條碼
+          <p class="text-xs text-[#4A4A47] font-medium">本店家尚未設定會員條碼</p>
+          <button onclick="openStoreManageModal(selectedStoreId)" class="mt-2 text-xs text-white bg-[#9CA9A5] px-3 py-1.5 rounded-lg hover:bg-[#4A4A47] transition-colors">
+            + 新增條碼
           </button>
         </div>
 
@@ -246,27 +234,6 @@
           <div>
             <label class="block text-[11px] text-[#4A4A47] mb-1">條碼類型</label>
             <select id="input-member-type" class="w-full p-2 text-xs rounded-lg border border-[#A0A29C] bg-white">
-              <option value="CODE128">一維條碼 (CODE128)</option>
-              <option value="EAN13">一維條碼 (EAN-13)</option>
-              <option value="EAN8">一維條碼 (EAN-8)</option>
-              <option value="CODE39">一維條碼 (CODE39)</option>
-              <option value="QR_CODE">二維條碼 (QR Code)</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Points Barcode Group -->
-        <div class="bg-white p-3 rounded-xl border border-[#A0A29C]/40 space-y-2">
-          <div class="text-xs font-bold text-[#4A4A47] flex items-center gap-1 border-b pb-1">
-            <i class="fa-solid fa-coins text-[#9CA9A5]"></i> 點數折抵條碼資訊（可選）
-          </div>
-          <div>
-            <label class="block text-[11px] text-[#4A4A47] mb-1">折抵條碼內容</label>
-            <input type="text" id="input-points-code" placeholder="若無可留空" class="w-full p-2 text-sm rounded-lg border border-[#A0A29C] bg-[#F5F1E8]/30 font-mono">
-          </div>
-          <div>
-            <label class="block text-[11px] text-[#4A4A47] mb-1">條碼類型</label>
-            <select id="input-points-type" class="w-full p-2 text-xs rounded-lg border border-[#A0A29C] bg-white">
               <option value="CODE128">一維條碼 (CODE128)</option>
               <option value="EAN13">一維條碼 (EAN-13)</option>
               <option value="EAN8">一維條碼 (EAN-8)</option>
@@ -431,8 +398,6 @@
           storeName: "7-ELEVEN",
           barcodeValue: "4710012345678",
           barcodeType: "CODE128",
-          pointsBarcodeValue: "OP987654321",
-          pointsBarcodeType: "CODE128"
         },
         {
           id: "store-family",
@@ -440,8 +405,6 @@
           storeName: "全家便利商店",
           barcodeValue: "FM88887777666",
           barcodeType: "CODE128",
-          pointsBarcodeValue: "FM-POINTS-999",
-          pointsBarcodeType: "CODE128"
         },
         {
           id: "store-px",
@@ -449,8 +412,6 @@
           storeName: "全聯福利中心",
           barcodeValue: "PX20001111222",
           barcodeType: "CODE128",
-          pointsBarcodeValue: "",
-          pointsBarcodeType: "CODE128"
         },
         {
           id: "store-carrefour",
@@ -458,8 +419,6 @@
           storeName: "家樂福",
           barcodeValue: "CF33334444555",
           barcodeType: "QR_CODE",
-          pointsBarcodeValue: "CF-DISCOUNT-100",
-          pointsBarcodeType: "CODE128"
         },
         {
           id: "store-mos",
@@ -467,8 +426,6 @@
           storeName: "摩斯漢堡",
           barcodeValue: "MOS777666555",
           barcodeType: "CODE128",
-          pointsBarcodeValue: "",
-          pointsBarcodeType: "CODE128"
         }
       ]
     };
@@ -476,7 +433,6 @@
     // Application State Variables
     let appData = loadAppData();
     let selectedStoreId = appData.stores.length > 0 ? appData.stores[0].id : null;
-    let activeTab = 'member'; // 'member' or 'points'
     let lastParsedScan = null;
 
     /* Load / Save Helpers */
@@ -512,10 +468,10 @@
       try {
         JsBarcode("#carrier-barcode-svg", appData.carrier || "/AB12345", {
           format: appData.carrierType || "CODE39",
-          width: 2,
-          height: 50,
+          width: 2.4,
+          height: 85,
           displayValue: true,
-          fontSize: 12,
+          fontSize: 14,
           margin: 0,
           background: "#ffffff",
           lineColor: "#000000"
@@ -589,23 +545,6 @@
       }
     }
 
-    /* Segmented Tab Switcher (Member vs Points) */
-    function switchTab(tab) {
-      activeTab = tab;
-      const memberBtn = document.getElementById('tab-member-btn');
-      const pointsBtn = document.getElementById('tab-points-btn');
-
-      if (tab === 'member') {
-        memberBtn.className = 'segmented-pill flex-1 py-2 text-center text-xs rounded-lg font-bold bg-white text-[#4A4A47] shadow-sm z-10';
-        pointsBtn.className = 'segmented-pill flex-1 py-2 text-center text-xs rounded-lg font-medium text-[#4A4A47]/70 hover:text-[#4A4A47] z-10';
-      } else {
-        pointsBtn.className = 'segmented-pill flex-1 py-2 text-center text-xs rounded-lg font-bold bg-white text-[#4A4A47] shadow-sm z-10';
-        memberBtn.className = 'segmented-pill flex-1 py-2 text-center text-xs rounded-lg font-medium text-[#4A4A47]/70 hover:text-[#4A4A47] z-10';
-      }
-
-      renderCurrentStoreContent();
-    }
-
     // Render Selected Store Details, Barcode & Notice
     function renderCurrentStoreContent() {
       const store = appData.stores.find(s => s.id === selectedStoreId);
@@ -620,11 +559,8 @@
       const barcodeValueText = document.getElementById('barcode-value-text');
       const qrCanvasContainer = document.getElementById('qrcode-canvas-container');
 
-      // Determine barcode value & format depending on activeTab
-      let targetValue = activeTab === 'member' ? store.barcodeValue : store.pointsBarcodeValue;
-      let targetType = activeTab === 'member' ? store.barcodeType : store.pointsBarcodeType;
-
-      targetType = targetType || 'CODE128';
+      let targetValue = store.barcodeValue;
+      let targetType = store.barcodeType || 'CODE128';
 
       // Hide all wrappers initially
       linearWrapper.classList.add('hidden');
@@ -683,7 +619,7 @@
       // Update Dynamic Notice Warning
       const noticeDynamic = document.getElementById('notice-dynamic-text');
       if (noticeDynamic) {
-        noticeDynamic.innerText = `${store.storeName}，${activeTab === 'member' ? '會員條碼' : '折扣條碼'}`;
+        noticeDynamic.innerText = `${store.storeName}，會員條碼`;
       }
     }
 
@@ -812,13 +748,8 @@
       const store = appData.stores.find(s => s.id === selectedStoreId);
       if (!store) return;
 
-      if (activeTab === 'member') {
-        store.barcodeValue = lastParsedScan.value;
-        store.barcodeType = lastParsedScan.format;
-      } else {
-        store.pointsBarcodeValue = lastParsedScan.value;
-        store.pointsBarcodeType = lastParsedScan.format;
-      }
+      store.barcodeValue = lastParsedScan.value;
+      store.barcodeType = lastParsedScan.format;
 
       saveAppData();
       closeScanModal();
@@ -838,8 +769,6 @@
           document.getElementById('input-store-name').value = store.storeName;
           document.getElementById('input-member-code').value = store.barcodeValue || '';
           document.getElementById('input-member-type').value = store.barcodeType || 'CODE128';
-          document.getElementById('input-points-code').value = store.pointsBarcodeValue || '';
-          document.getElementById('input-points-type').value = store.pointsBarcodeType || 'CODE128';
           title.innerText = "編輯店家條碼";
           deleteBtn.classList.remove('hidden');
         }
@@ -849,18 +778,11 @@
         document.getElementById('input-store-name').value = '';
         document.getElementById('input-member-code').value = '';
         document.getElementById('input-member-type').value = 'CODE128';
-        document.getElementById('input-points-code').value = '';
-        document.getElementById('input-points-type').value = 'CODE128';
         title.innerText = "新增店家卡片";
         deleteBtn.classList.add('hidden');
       }
 
       modal.classList.remove('hidden');
-    }
-
-    function openAddBarcodeModalForPoints() {
-      switchTab('points');
-      openStoreManageModal(selectedStoreId);
     }
 
     function closeStoreModal() {
@@ -872,8 +794,6 @@
       const storeName = document.getElementById('input-store-name').value.trim();
       const memberCode = document.getElementById('input-member-code').value.trim();
       const memberType = document.getElementById('input-member-type').value;
-      const pointsCode = document.getElementById('input-points-code').value.trim();
-      const pointsType = document.getElementById('input-points-type').value;
 
       if (!storeName) {
         alert("請輸入店家名稱");
@@ -887,8 +807,6 @@
           store.storeName = storeName;
           store.barcodeValue = memberCode;
           store.barcodeType = memberType;
-          store.pointsBarcodeValue = pointsCode;
-          store.pointsBarcodeType = pointsType;
         }
       } else {
         // Create new store
@@ -898,9 +816,7 @@
           order: appData.stores.length + 1,
           storeName: storeName,
           barcodeValue: memberCode,
-          barcodeType: memberType,
-          pointsBarcodeValue: pointsCode,
-          pointsBarcodeType: pointsType
+          barcodeType: memberType
         };
         appData.stores.push(newStore);
         selectedStoreId = newId;
@@ -1049,11 +965,15 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Network-first: always try to fetch the latest version first so the app
+// auto-updates whenever it's opened online; fall back to cache when offline.
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
-    })
+    fetch(event.request).then((networkResponse) => {
+      const clone = networkResponse.clone();
+      caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+      return networkResponse;
+    }).catch(() => caches.match(event.request))
   );
 });`;
       downloadFile("sw.js", swContent);
@@ -1084,13 +1004,23 @@ self.addEventListener('fetch', (event) => {
     window.onload = function() {
       renderCarrierBarcode();
       renderStoreNav();
-      switchTab('member');
+      renderCurrentStoreContent();
 
-      // Attempt to register dynamic offline Blob ServiceWorker if supported
+      // Register Service Worker and auto-check for updates every time the app opens
       if ('serviceWorker' in navigator) {
         try {
-          navigator.serviceWorker.register('./sw.js').catch((err) => {
+          navigator.serviceWorker.register('./sw.js').then((reg) => {
+            reg.update(); // proactively check the server for a newer sw.js right now
+          }).catch((err) => {
             console.log("Offline fallback ready (standard SW relative path checked)");
+          });
+
+          // Reload once so the page picks up the new version immediately
+          let hasReloaded = false;
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (hasReloaded) return;
+            hasReloaded = true;
+            window.location.reload();
           });
         } catch (e) {}
       }
