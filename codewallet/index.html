@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>條碼與會員卡 PWA</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Barcode & QR Code Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bgMain: '#F5F1E8',
+            greyMuted: '#9CA9A5',
+            greyBorder: '#A0A29C',
+            textMain: '#4A4A47',
+            recessedBg: '#E5E1D6',
+            greySelectedText: '#6B7280',
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* Global Base Reset & Fonts */
+    body {
+      background-color: #F5F1E8;
+      color: #4A4A47;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Scrollbar Hiding for Horizontal Store Navigation */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Dynamic Store Tab Styling according to Spec */
+    /* Selected tab: Rice white #F5F1E8 bg + grey text, NO border -> blends with content below */
+    .store-tab-active {
+      background-color: #F5F1E8 !important;
+      color: #4A4A47 !important;
+      border: none !important;
+      font-weight: 700;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.03);
+    }
+    /* Unselected tab: Muted grey #9CA9A5 bg + Rice white text, NO border */
+    .store-tab-inactive {
+      background-color: #9CA9A5 !important;
+      color: #F5F1E8 !important;
+      border: none !important;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+    
+    /* Segmented Control Transition */
+    .segmented-pill {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Safe Area Adaptability for iOS & Modern Smartphones */
+    .safe-container {
+      padding-top: max(0.5rem, env(safe-area-inset-top));
+      padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+      padding-left: max(1rem, env(safe-area-inset-left));
+      padding-right: max(1rem, env(safe-area-inset-right));
+    }
+  </style>
+</head>
+<body class="bg-[#F5F1E8] text-[#4A4A47] antialiased min-h-[100dvh] flex flex-col justify-center items-center">
+
+  <!-- Main Single-Screen Viewport Container (Max 480px width for optimal single-hand mobile usage) -->
+  <div class="w-full max-w-md h-[100dvh] flex flex-col justify-between safe-container relative overflow-hidden bg-[#F5F1E8]">
+    
+    <!-- Top Bar: Settings & PWA Export Guide -->
+    <div class="flex justify-between items-center px-2 py-1 mb-1 shrink-0">
+      <div class="flex items-center space-x-1">
+        <i class="fa-solid fa-wallet text-[#9CA9A5] text-lg"></i>
+        <span class="font-bold text-xs tracking-wider uppercase text-[#9CA9A5]">會員卡隨身包</span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button onclick="openPwaGuideModal()" class="text-xs px-2.5 py-1 rounded-full bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#9CA9A5] hover:text-white transition-colors flex items-center gap-1 font-medium">
+          <i class="fa-solid fa-cloud-arrow-down"></i>
+          <span>PWA/部署</span>
+        </button>
+        <button onclick="openStoreManageModal()" class="w-8 h-8 rounded-full bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#9CA9A5] hover:text-white transition-colors flex items-center justify-center">
+          <i class="fa-solid fa-gear text-sm"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 1. Universal Carrier Barcode (手機通用載具條碼 - 固定常駐頂端，不受滑動影響) -->
+    <div class="bg-white rounded-xl p-3 shadow-sm border border-[#A0A29C]/30 shrink-0 mb-3 relative group">
+      <div class="flex justify-between items-center mb-1">
+        <div class="flex items-center space-x-1.5">
+          <i class="fa-solid fa-barcode text-[#4A4A47] text-sm"></i>
+          <span class="text-xs font-bold text-[#4A4A47] tracking-wider">手機通用載具</span>
+        </div>
+        <button onclick="editCarrierCode()" class="text-[11px] text-[#9CA9A5] hover:text-[#4A4A47] underline flex items-center gap-1">
+          <i class="fa-solid fa-pen text-[10px]"></i>
+          <span id="carrier-display-text">/AB12345</span>
+        </button>
+      </div>
+      
+      <!-- Barcode Container with Adequate Quiet Zone -->
+      <div class="bg-white p-2 rounded-lg flex flex-col items-center justify-center min-h-[70px]">
+        <svg id="carrier-barcode-svg" class="w-full h-16 max-h-16"></svg>
+      </div>
+    </div>
+
+    <!-- 2. Store Navigation Bar (店家導覽列 - 橫向滑動, 無拖曳, 選中標籤無邊框融入背景) -->
+    <div class="relative shrink-0 mb-3">
+      <!-- Left Visual Hint Chevron Arrow (Non-clickable visual cue) -->
+      <div class="absolute left-0 top-0 bottom-0 w-6 z-10 pointer-events-none flex items-center justify-start bg-gradient-to-r from-[#F5F1E8] to-transparent pl-0.5">
+        <i class="fa-solid fa-chevron-left text-[10px] text-[#9CA9A5]/70"></i>
+      </div>
+      
+      <!-- Right Visual Hint Chevron Arrow (Non-clickable visual cue) -->
+      <div class="absolute right-0 top-0 bottom-0 w-6 z-10 pointer-events-none flex items-center justify-end bg-gradient-to-l from-[#F5F1E8] to-transparent pr-0.5">
+        <i class="fa-solid fa-chevron-right text-[10px] text-[#9CA9A5]/70"></i>
+      </div>
+
+      <!-- Scrollable Tab Row -->
+      <div id="store-nav-container" class="flex overflow-x-auto no-scrollbar space-x-2 px-5 py-1">
+        <!-- Store tabs dynamically rendered here -->
+      </div>
+    </div>
+
+    <!-- 3. Segmented Control (會員條碼 / 點數折抵 分頁切換) -->
+    <div class="shrink-0 mb-3 px-1">
+      <div class="bg-[#E5E1D6] p-1 rounded-xl flex items-center relative">
+        <button id="tab-member-btn" onclick="switchTab('member')" class="segmented-pill flex-1 py-2 text-center text-xs rounded-lg font-bold transition-all duration-200 z-10">
+          <i class="fa-solid fa-id-card mr-1"></i>會員條碼
+        </button>
+        <button id="tab-points-btn" onclick="switchTab('points')" class="segmented-pill flex-1 py-2 text-center text-xs rounded-lg font-bold transition-all duration-200 z-10">
+          <i class="fa-solid fa-coins mr-1"></i>點數折抵
+        </button>
+      </div>
+    </div>
+
+    <!-- Content Card Wrapper -->
+    <div class="flex-1 flex flex-col justify-between bg-white rounded-2xl p-4 shadow-sm border border-[#A0A29C]/30 min-h-0 mb-3">
+      
+      <!-- 4. Selected Store Name (大字顯示防呆確認) -->
+      <div class="text-center py-1 border-b border-gray-100 shrink-0">
+        <h1 id="current-store-name" class="text-2xl font-black text-[#4A4A47] tracking-wide truncate">
+          7-ELEVEN
+        </h1>
+      </div>
+
+      <!-- 5. Dynamic Barcode Area (顯示會員條碼或點數條碼 + 卡號) -->
+      <div class="flex-1 flex flex-col items-center justify-center my-2 min-h-[160px] relative">
+        <!-- SVG Barcode element for Linear formats (Code128, EAN, etc) -->
+        <div id="linear-barcode-wrapper" class="w-full flex flex-col items-center justify-center">
+          <svg id="store-barcode-svg" class="w-full max-h-32"></svg>
+        </div>
+        
+        <!-- Canvas/Div element for QR Code format -->
+        <div id="qr-barcode-wrapper" class="hidden flex flex-col items-center justify-center p-2 bg-white rounded-lg">
+          <div id="qrcode-canvas-container"></div>
+        </div>
+
+        <!-- Empty State Prompt if Points barcode is missing -->
+        <div id="empty-barcode-state" class="hidden flex flex-col items-center justify-center text-center p-4">
+          <i class="fa-solid fa-circle-exclamation text-3xl text-[#9CA9A5] mb-2"></i>
+          <p class="text-xs text-[#4A4A47] font-medium">本店家尚未設定點數折抵條碼</p>
+          <button onclick="openAddBarcodeModalForPoints()" class="mt-2 text-xs text-white bg-[#9CA9A5] px-3 py-1.5 rounded-lg hover:bg-[#4A4A47] transition-colors">
+            + 新增點數條碼
+          </button>
+        </div>
+
+        <!-- Barcode Text String Display -->
+        <div id="barcode-value-text" class="mt-2 text-center font-mono text-sm tracking-widest font-bold text-[#4A4A47]">
+          4710012345678
+        </div>
+      </div>
+
+      <!-- Quick Action Floating Tools inside Card -->
+      <div class="flex justify-end gap-2 border-t border-gray-100 pt-2 shrink-0">
+        <button onclick="openScanModal()" class="text-xs text-[#9CA9A5] hover:text-[#4A4A47] px-2 py-1 rounded flex items-center gap-1">
+          <i class="fa-solid fa-camera"></i>
+          <span>掃碼/貼上新增</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 6. Warning & Notice Text (固定顯示於主畫面，不做 Modal/WakeLock) -->
+    <div class="shrink-0 bg-[#E5E1D6]/60 rounded-xl p-2.5 text-center text-xs space-y-0.5 border border-[#A0A29C]/20">
+      <p id="notice-dynamic-text" class="font-bold text-[#4A4A47]">
+        7-ELEVEN，會員條碼
+      </p>
+      <p class="text-[11px] text-[#4A4A47]/80">
+        如果掃描失敗，請將螢幕亮度調整到最亮
+      </p>
+    </div>
+
+  </div>
+
+  <!-- MODAL A: Store Management Modal (Add, Edit, Delete, Backup) -->
+  <div id="store-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden backdrop-blur-xs">
+    <div class="bg-[#F5F1E8] w-full max-w-sm rounded-2xl p-5 shadow-xl border border-[#A0A29C] max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center mb-4 shrink-0 border-b border-[#A0A29C]/30 pb-2">
+        <h2 id="modal-title" class="text-lg font-bold text-[#4A4A47]">店家與條碼管理</h2>
+        <button onclick="closeStoreModal()" class="text-[#9CA9A5] hover:text-[#4A4A47] text-lg font-bold px-2">✕</button>
+      </div>
+
+      <!-- Form Content -->
+      <div class="overflow-y-auto flex-1 space-y-4 pr-1">
+        <input type="hidden" id="edit-store-id" value="">
+
+        <div>
+          <label class="block text-xs font-bold text-[#4A4A47] mb-1">店家名稱 *</label>
+          <input type="text" id="input-store-name" placeholder="例如: 7-ELEVEN" class="w-full p-2 text-sm rounded-lg border border-[#A0A29C] bg-white focus:outline-none focus:ring-1 focus:ring-[#9CA9A5]">
+        </div>
+
+        <!-- Member Barcode Group -->
+        <div class="bg-white p-3 rounded-xl border border-[#A0A29C]/40 space-y-2">
+          <div class="text-xs font-bold text-[#4A4A47] flex items-center gap-1 border-b pb-1">
+            <i class="fa-solid fa-id-card text-[#9CA9A5]"></i> 會員條碼資訊
+          </div>
+          <div>
+            <label class="block text-[11px] text-[#4A4A47] mb-1">會員卡號 / 條碼內容 *</label>
+            <input type="text" id="input-member-code" placeholder="請輸入條碼字串" class="w-full p-2 text-sm rounded-lg border border-[#A0A29C] bg-[#F5F1E8]/30 font-mono">
+          </div>
+          <div>
+            <label class="block text-[11px] text-[#4A4A47] mb-1">條碼類型</label>
+            <select id="input-member-type" class="w-full p-2 text-xs rounded-lg border border-[#A0A29C] bg-white">
+              <option value="CODE128">一維條碼 (CODE128)</option>
+              <option value="EAN13">一維條碼 (EAN-13)</option>
+              <option value="EAN8">一維條碼 (EAN-8)</option>
+              <option value="CODE39">一維條碼 (CODE39)</option>
+              <option value="QR_CODE">二維條碼 (QR Code)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Points Barcode Group -->
+        <div class="bg-white p-3 rounded-xl border border-[#A0A29C]/40 space-y-2">
+          <div class="text-xs font-bold text-[#4A4A47] flex items-center gap-1 border-b pb-1">
+            <i class="fa-solid fa-coins text-[#9CA9A5]"></i> 點數折抵條碼資訊（可選）
+          </div>
+          <div>
+            <label class="block text-[11px] text-[#4A4A47] mb-1">折抵條碼內容</label>
+            <input type="text" id="input-points-code" placeholder="若無可留空" class="w-full p-2 text-sm rounded-lg border border-[#A0A29C] bg-[#F5F1E8]/30 font-mono">
+          </div>
+          <div>
+            <label class="block text-[11px] text-[#4A4A47] mb-1">條碼類型</label>
+            <select id="input-points-type" class="w-full p-2 text-xs rounded-lg border border-[#A0A29C] bg-white">
+              <option value="CODE128">一維條碼 (CODE128)</option>
+              <option value="EAN13">一維條碼 (EAN-13)</option>
+              <option value="EAN8">一維條碼 (EAN-8)</option>
+              <option value="CODE39">一維條碼 (CODE39)</option>
+              <option value="QR_CODE">二維條碼 (QR Code)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Backup & Restore Section -->
+        <div class="pt-2 border-t border-[#A0A29C]/30 flex gap-2">
+          <button onclick="exportDataJSON()" type="button" class="flex-1 py-1.5 text-xs rounded-lg border border-[#9CA9A5] text-[#4A4A47] hover:bg-[#E5E1D6]">
+            <i class="fa-solid fa-download mr-1"></i>匯出 JSON
+          </button>
+          <label class="flex-1 py-1.5 text-xs rounded-lg border border-[#9CA9A5] text-[#4A4A47] hover:bg-[#E5E1D6] text-center cursor-pointer">
+            <i class="fa-solid fa-upload mr-1"></i>匯入 JSON
+            <input type="file" id="import-json-file" accept=".json" onchange="importDataJSON(event)" class="hidden">
+          </label>
+        </div>
+      </div>
+
+      <!-- Modal Footer Action Buttons -->
+      <div class="mt-4 pt-3 border-t border-[#A0A29C]/30 flex gap-2 shrink-0">
+        <button id="delete-store-btn" onclick="deleteCurrentEditStore()" type="button" class="px-3 py-2 text-xs bg-red-100 text-red-700 rounded-lg hover:bg-red-200 hidden">
+          刪除
+        </button>
+        <button onclick="closeStoreModal()" type="button" class="flex-1 py-2 text-xs bg-[#E5E1D6] text-[#4A4A47] rounded-lg hover:bg-[#9CA9A5] hover:text-white transition-colors">
+          取消
+        </button>
+        <button onclick="saveStoreData()" type="button" class="flex-1 py-2 text-xs bg-[#9CA9A5] text-white rounded-lg hover:bg-[#4A4A47] font-bold transition-colors">
+          儲存
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL B: Scanner / Image Upload / Clipboard Barcode Recognition -->
+  <div id="scan-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden backdrop-blur-xs">
+    <div class="bg-[#F5F1E8] w-full max-w-sm rounded-2xl p-5 shadow-xl border border-[#A0A29C]">
+      <div class="flex justify-between items-center mb-3 border-b border-[#A0A29C]/30 pb-2">
+        <h2 class="text-base font-bold text-[#4A4A47]">條碼解析辨識</h2>
+        <button onclick="closeScanModal()" class="text-[#9CA9A5] hover:text-[#4A4A47] text-lg font-bold px-2">✕</button>
+      </div>
+
+      <p class="text-xs text-[#4A4A47]/80 mb-4">
+        上傳圖片或從剪貼簿貼上條碼，自動解析條碼內容與類型（不保存原始圖片）。
+      </p>
+
+      <div class="space-y-3">
+        <!-- 1. File Upload Recognition -->
+        <label class="block w-full p-4 border-2 border-dashed border-[#9CA9A5] rounded-xl text-center cursor-pointer bg-white hover:bg-[#F5F1E8]/50 transition-colors">
+          <i class="fa-solid fa-file-image text-2xl text-[#9CA9A5] mb-1"></i>
+          <span class="block text-xs font-bold text-[#4A4A47]">上傳條碼照片 / 截圖</span>
+          <span class="block text-[10px] text-[#9CA9A5] mt-0.5">支援 JPG, PNG, WEBP</span>
+          <input type="file" id="scan-file-input" accept="image/*" onchange="handleImageScan(event)" class="hidden">
+        </label>
+
+        <!-- 2. Clipboard Paste for iOS Safari -->
+        <button onclick="handleClipboardPaste()" class="w-full py-3 bg-white border border-[#A0A29C] rounded-xl text-xs font-bold text-[#4A4A47] hover:bg-[#E5E1D6] transition-colors flex items-center justify-center gap-2">
+          <i class="fa-solid fa-paste text-[#9CA9A5]"></i>
+          <span>讀取剪貼簿內容 / 貼上條碼</span>
+        </button>
+      </div>
+
+      <!-- Scan Result Preview Box -->
+      <div id="scan-result-box" class="hidden mt-4 p-3 bg-green-50 border border-green-200 rounded-xl">
+        <div class="text-xs font-bold text-green-800 mb-1 flex items-center gap-1">
+          <i class="fa-solid fa-circle-check"></i> 成功解析條碼！
+        </div>
+        <p id="scan-result-text" class="text-xs font-mono text-gray-800 break-all"></p>
+        <p id="scan-result-type" class="text-[10px] text-gray-500 mt-1"></p>
+        <button onclick="applyScanResultToCurrentStore()" class="mt-2 w-full py-1.5 text-xs bg-green-700 text-white font-bold rounded-lg hover:bg-green-800">
+          填入當前店家卡號
+        </button>
+      </div>
+
+      <div class="mt-4 pt-2 border-t border-[#A0A29C]/30 text-right">
+        <button onclick="closeScanModal()" class="px-4 py-1.5 text-xs bg-[#E5E1D6] text-[#4A4A47] rounded-lg hover:bg-[#9CA9A5] hover:text-white">
+          關閉
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL C: PWA & GitHub Pages Deployment Guide Modal -->
+  <div id="pwa-guide-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden backdrop-blur-xs">
+    <div class="bg-[#F5F1E8] w-full max-w-md rounded-2xl p-5 shadow-xl border border-[#A0A29C] max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center mb-3 border-b border-[#A0A29C]/30 pb-2 shrink-0">
+        <h2 class="text-base font-bold text-[#4A4A47] flex items-center gap-2">
+          <i class="fa-brands fa-github"></i> GitHub Pages 與 PWA 部署指南
+        </h2>
+        <button onclick="closePwaGuideModal()" class="text-[#9CA9A5] hover:text-[#4A4A47] text-lg font-bold px-2">✕</button>
+      </div>
+
+      <div class="overflow-y-auto flex-1 space-y-4 text-xs text-[#4A4A47] pr-1">
+        <div class="bg-white p-3 rounded-xl border border-[#A0A29C]/30">
+          <h3 class="font-bold mb-1 text-sm text-[#4A4A47]">1. 專案檔案結構</h3>
+          <p class="text-[11px] text-[#4A4A47]/80 mb-2">部署至 GitHub Pages 前，請確保 Repository 包含以下檔案：</p>
+          <ul class="list-disc list-inside space-y-1 text-[11px] font-mono bg-[#F5F1E8] p-2 rounded">
+            <li>index.html (主程式畫面)</li>
+            <li>manifest.json (PWA 描述檔)</li>
+            <li>sw.js (Service Worker 離線快取)</li>
+            <li>.nojekyll (避免 GitHub Pages 誤用 Jekyll 處理)</li>
+          </ul>
+        </div>
+
+        <!-- 1-Click File Exporters -->
+        <div class="bg-white p-3 rounded-xl border border-[#A0A29C]/30 space-y-2">
+          <h3 class="font-bold text-sm text-[#4A4A47]">2. 一鍵匯出 PWA 部署資產</h3>
+          <p class="text-[11px] text-[#4A4A47]/80">點擊下方按鈕可直接下載 PWA 部署所需的設定檔：</p>
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button onclick="downloadManifestJson()" class="p-2 bg-[#E5E1D6] hover:bg-[#9CA9A5] hover:text-white rounded-lg text-left transition-colors">
+              <span class="block font-bold">manifest.json</span>
+              <span class="text-[10px] opacity-80">下載 PWA 描述檔</span>
+            </button>
+            <button onclick="downloadSwJs()" class="p-2 bg-[#E5E1D6] hover:bg-[#9CA9A5] hover:text-white rounded-lg text-left transition-colors">
+              <span class="block font-bold">sw.js</span>
+              <span class="text-[10px] opacity-80">下載 Service Worker</span>
+            </button>
+            <button onclick="downloadNoJekyll()" class="p-2 bg-[#E5E1D6] hover:bg-[#9CA9A5] hover:text-white rounded-lg text-left transition-colors">
+              <span class="block font-bold">.nojekyll</span>
+              <span class="text-[10px] opacity-80">下載 空檔</span>
+            </button>
+            <button onclick="copyManifestSnippet()" class="p-2 bg-[#E5E1D6] hover:bg-[#9CA9A5] hover:text-white rounded-lg text-left transition-colors">
+              <span class="block font-bold"><i class="fa-solid fa-copy"></i> 複製設定內容</span>
+              <span class="text-[10px] opacity-80">複製到剪貼簿</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white p-3 rounded-xl border border-[#A0A29C]/30">
+          <h3 class="font-bold mb-1 text-sm text-[#4A4A47]">3. GitHub Pages 部署 4 步驟</h3>
+          <ol class="list-decimal list-inside space-y-1 text-[11px] text-[#4A4A47]/90">
+            <li>建立一個全新的 GitHub Repository（例: <code class="bg-gray-100 px-1 rounded">my-barcode-pwa</code>）。</li>
+            <li>將 <code class="bg-gray-100 px-1 rounded">index.html</code>、<code class="bg-gray-100 px-1 rounded">manifest.json</code>、<code class="bg-gray-100 px-1 rounded">sw.js</code> 與 <code class="bg-gray-100 px-1 rounded">.nojekyll</code> 上傳至 Repository。</li>
+            <li>前往 Repository 的 <strong>Settings → Pages</strong>。</li>
+            <li>Build and deployment 選擇 <strong>Deploy from a branch</strong>，Branch 選擇 <code class="bg-gray-100 px-1 rounded">main / root</code> 並儲存。稍等 1 分鐘即可取得 PWA 專屬網址！</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-2 border-t border-[#A0A29C]/30 text-right shrink-0">
+        <button onclick="closePwaGuideModal()" class="px-4 py-1.5 text-xs bg-[#9CA9A5] text-white font-bold rounded-lg hover:bg-[#4A4A47]">
+          我知道了
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* Global Storage Key & Initial Preset Data */
+    const STORAGE_KEY = 'pwa_barcode_wallet_v2';
+
+    // Preset Default Data
+    const defaultData = {
+      carrier: "/AB12345",
+      carrierType: "CODE39",
+      stores: [
+        {
+          id: "store-711",
+          order: 1,
+          storeName: "7-ELEVEN",
+          barcodeValue: "4710012345678",
+          barcodeType: "CODE128",
+          pointsBarcodeValue: "OP987654321",
+          pointsBarcodeType: "CODE128"
+        },
+        {
+          id: "store-family",
+          order: 2,
+          storeName: "全家便利商店",
+          barcodeValue: "FM88887777666",
+          barcodeType: "CODE128",
+          pointsBarcodeValue: "FM-POINTS-999",
+          pointsBarcodeType: "CODE128"
+        },
+        {
+          id: "store-px",
+          order: 3,
+          storeName: "全聯福利中心",
+          barcodeValue: "PX20001111222",
+          barcodeType: "CODE128",
+          pointsBarcodeValue: "",
+          pointsBarcodeType: "CODE128"
+        },
+        {
+          id: "store-carrefour",
+          order: 4,
+          storeName: "家樂福",
+          barcodeValue: "CF33334444555",
+          barcodeType: "QR_CODE",
+          pointsBarcodeValue: "CF-DISCOUNT-100",
+          pointsBarcodeType: "CODE128"
+        },
+        {
+          id: "store-mos",
+          order: 5,
+          storeName: "摩斯漢堡",
+          barcodeValue: "MOS777666555",
+          barcodeType: "CODE128",
+          pointsBarcodeValue: "",
+          pointsBarcodeType: "CODE128"
+        }
+      ]
+    };
+
+    // Application State Variables
+    let appData = loadAppData();
+    let selectedStoreId = appData.stores.length > 0 ? appData.stores[0].id : null;
+    let activeTab = 'member'; // 'member' or 'points'
+    let lastParsedScan = null;
+
+    /* Load / Save Helpers */
+    function loadAppData() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && Array.isArray(parsed.stores)) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load local storage:", e);
+      }
+      return defaultData;
+    }
+
+    function saveAppData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+      } catch (e) {
+        console.error("Failed to save to local storage:", e);
+      }
+    }
+
+    // Render Mobile Carrier Barcode
+    function renderCarrierBarcode() {
+      const carrierSvg = document.getElementById('carrier-barcode-svg');
+      const carrierText = document.getElementById('carrier-display-text');
+      if (carrierText) carrierText.innerText = appData.carrier || "/AB12345";
+      
+      try {
+        JsBarcode("#carrier-barcode-svg", appData.carrier || "/AB12345", {
+          format: appData.carrierType || "CODE39",
+          width: 2,
+          height: 50,
+          displayValue: true,
+          fontSize: 12,
+          margin: 0,
+          background: "#ffffff",
+          lineColor: "#000000"
+        });
+      } catch (err) {
+        console.warn("Carrier barcode render error, fallback to CODE128:", err);
+        try {
+          JsBarcode("#carrier-barcode-svg", appData.carrier || "/AB12345", {
+            format: "CODE128",
+            width: 2,
+            height: 50,
+            displayValue: true,
+            fontSize: 12,
+            margin: 0
+          });
+        } catch(e){}
+      }
+    }
+
+    // Prompt user to edit Mobile Carrier code on the fly
+    function editCarrierCode() {
+      const newCode = prompt("請輸入您的手機通用載具條碼（含前導斜線 /）：", appData.carrier);
+      if (newCode !== null && newCode.trim() !== "") {
+        appData.carrier = newCode.trim().toUpperCase();
+        saveAppData();
+        renderCarrierBarcode();
+      }
+    }
+
+    // Render Store Navbar
+    function renderStoreNav() {
+      const navContainer = document.getElementById('store-nav-container');
+      if (!navContainer) return;
+
+      navContainer.innerHTML = '';
+
+      appData.stores.forEach((store) => {
+        const isSelected = store.id === selectedStoreId;
+        const btn = document.createElement('button');
+        
+        btn.className = `px-3.5 py-1.5 text-xs rounded-lg whitespace-nowrap transition-all duration-150 shrink-0 ${
+          isSelected ? 'store-tab-active' : 'store-tab-inactive'
+        }`;
+        
+        btn.innerText = store.storeName;
+        btn.onclick = () => selectStore(store.id);
+        navContainer.appendChild(btn);
+      });
+
+      // Render Add Store Button at the end of Navbar
+      const addBtn = document.createElement('button');
+      addBtn.className = "px-2.5 py-1.5 text-xs rounded-lg whitespace-nowrap bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#9CA9A5] hover:text-white shrink-0 font-bold transition-colors";
+      addBtn.innerHTML = '<i class="fa-solid fa-plus mr-1"></i>新增';
+      addBtn.onclick = () => openStoreManageModal(null);
+      navContainer.appendChild(addBtn);
+    }
+
+    function selectStore(storeId) {
+      selectedStoreId = storeId;
+      renderStoreNav();
+      renderCurrentStoreContent();
+      
+      // Auto center selected tab in scrollable row
+      const navContainer = document.getElementById('store-nav-container');
+      const index = appData.stores.findIndex(s => s.id === storeId);
+      if (navContainer && index >= 0) {
+        const childBtn = navContainer.children[index];
+        if (childBtn) {
+          childBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      }
+    }
+
+    /* Segmented Tab Switcher (Member vs Points) */
+    function switchTab(tab) {
+      activeTab = tab;
+      const memberBtn = document.getElementById('tab-member-btn');
+      const pointsBtn = document.getElementById('tab-points-btn');
+
+      if (tab === 'member') {
+        memberBtn.className = 'segmented-pill flex-1 py-2 text-center text-xs rounded-lg font-bold bg-white text-[#4A4A47] shadow-sm z-10';
+        pointsBtn.className = 'segmented-pill flex-1 py-2 text-center text-xs rounded-lg font-medium text-[#4A4A47]/70 hover:text-[#4A4A47] z-10';
+      } else {
+        pointsBtn.className = 'segmented-pill flex-1 py-2 text-center text-xs rounded-lg font-bold bg-white text-[#4A4A47] shadow-sm z-10';
+        memberBtn.className = 'segmented-pill flex-1 py-2 text-center text-xs rounded-lg font-medium text-[#4A4A47]/70 hover:text-[#4A4A47] z-10';
+      }
+
+      renderCurrentStoreContent();
+    }
+
+    // Render Selected Store Details, Barcode & Notice
+    function renderCurrentStoreContent() {
+      const store = appData.stores.find(s => s.id === selectedStoreId);
+      if (!store) return;
+
+      // Update Store Name Header
+      document.getElementById('current-store-name').innerText = store.storeName;
+
+      const linearWrapper = document.getElementById('linear-barcode-wrapper');
+      const qrWrapper = document.getElementById('qr-barcode-wrapper');
+      const emptyState = document.getElementById('empty-barcode-state');
+      const barcodeValueText = document.getElementById('barcode-value-text');
+      const qrCanvasContainer = document.getElementById('qrcode-canvas-container');
+
+      // Determine barcode value & format depending on activeTab
+      let targetValue = activeTab === 'member' ? store.barcodeValue : store.pointsBarcodeValue;
+      let targetType = activeTab === 'member' ? store.barcodeType : store.pointsBarcodeType;
+
+      targetType = targetType || 'CODE128';
+
+      // Hide all wrappers initially
+      linearWrapper.classList.add('hidden');
+      qrWrapper.classList.add('hidden');
+      emptyState.classList.add('hidden');
+      barcodeValueText.innerText = '';
+
+      if (!targetValue || targetValue.trim() === '') {
+        // Show empty state prompt
+        emptyState.classList.remove('hidden');
+      } else {
+        barcodeValueText.innerText = targetValue;
+
+        if (targetType === 'QR_CODE') {
+          qrWrapper.classList.remove('hidden');
+          qrCanvasContainer.innerHTML = ''; // clear previous QR Code
+          try {
+            new QRCode(qrCanvasContainer, {
+              text: targetValue,
+              width: 150,
+              height: 150,
+              colorDark : "#000000",
+              colorLight : "#ffffff",
+              correctLevel : QRCode.CorrectLevel.M
+            });
+          } catch (e) {
+            console.error("QR Code generation error:", e);
+          }
+        } else {
+          linearWrapper.classList.remove('hidden');
+          try {
+            JsBarcode("#store-barcode-svg", targetValue, {
+              format: targetType,
+              width: 2,
+              height: 70,
+              displayValue: false, // Card value shown in dedicated text div below
+              margin: 10,
+              background: "#ffffff",
+              lineColor: "#000000"
+            });
+          } catch (e) {
+            console.warn(`Fallback rendering CODE128 for ${targetValue}`, e);
+            try {
+              JsBarcode("#store-barcode-svg", targetValue, {
+                format: "CODE128",
+                width: 2,
+                height: 70,
+                displayValue: false,
+                margin: 10
+              });
+            } catch(err){}
+          }
+        }
+      }
+
+      // Update Dynamic Notice Warning
+      const noticeDynamic = document.getElementById('notice-dynamic-text');
+      if (noticeDynamic) {
+        noticeDynamic.innerText = `${store.storeName}，${activeTab === 'member' ? '會員條碼' : '折扣條碼'}`;
+      }
+    }
+
+    /* Barcode Scanner & Image Decoder Functions */
+    function openScanModal() {
+      document.getElementById('scan-result-box').classList.add('hidden');
+      document.getElementById('scan-modal').classList.remove('hidden');
+    }
+
+    function closeScanModal() {
+      document.getElementById('scan-modal').classList.add('hidden');
+    }
+
+    // Process image file input via ZXing library
+    async function handleImageScan(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const imageUrl = e.target.result;
+        decodeBarcodeFromImageSrc(imageUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Decode Image Source using ZXing or BarcodeDetector API
+    async function decodeBarcodeFromImageSrc(src) {
+      const resultBox = document.getElementById('scan-result-box');
+      const resultText = document.getElementById('scan-result-text');
+      const resultType = document.getElementById('scan-result-type');
+
+      try {
+        // Option A: Try ZXing BrowserMultiFormatReader
+        if (window.ZXing) {
+          const codeReader = new ZXing.BrowserMultiFormatReader();
+          const img = new Image();
+          img.src = src;
+          img.onload = async () => {
+            try {
+              const result = await codeReader.decodeFromImageElement(img);
+              if (result) {
+                lastParsedScan = {
+                  value: result.getText(),
+                  format: mapZXingFormatToType(result.getBarcodeFormat())
+                };
+                resultText.innerText = lastParsedScan.value;
+                resultType.innerText = `格式: ${lastParsedScan.format}`;
+                resultBox.classList.remove('hidden');
+                return;
+              }
+            } catch (err) {
+              console.warn("ZXing decode attempt failed:", err);
+              fallbackNativeDetector(img);
+            }
+          };
+        } else {
+          const img = new Image();
+          img.src = src;
+          img.onload = () => fallbackNativeDetector(img);
+        }
+      } catch (err) {
+        alert("無法讀取條碼照片，請嘗試手動輸入。");
+      }
+    }
+
+    // Native BarcodeDetector Fallback
+    async function fallbackNativeDetector(img) {
+      const resultBox = document.getElementById('scan-result-box');
+      const resultText = document.getElementById('scan-result-text');
+      const resultType = document.getElementById('scan-result-type');
+
+      if ('BarcodeDetector' in window) {
+        try {
+          const detector = new BarcodeDetector();
+          const barcodes = await detector.detect(img);
+          if (barcodes && barcodes.length > 0) {
+            lastParsedScan = {
+              value: barcodes[0].rawValue,
+              format: barcodes[0].format.toUpperCase().includes('QR') ? 'QR_CODE' : 'CODE128'
+            };
+            resultText.innerText = lastParsedScan.value;
+            resultType.innerText = `格式: ${lastParsedScan.format}`;
+            resultBox.classList.remove('hidden');
+            return;
+          }
+        } catch (e) {
+          console.warn("Native BarcodeDetector failed:", e);
+        }
+      }
+      alert("無法自動辨識圖檔中的條碼，請手動輸入卡號。");
+    }
+
+    function mapZXingFormatToType(formatInt) {
+      // Basic ZXing format mapper
+      if (formatInt === 11 || formatInt === 'QR_CODE') return 'QR_CODE';
+      if (formatInt === 5 || formatInt === 'EAN_13') return 'EAN13';
+      if (formatInt === 4 || formatInt === 'EAN_8') return 'EAN8';
+      if (formatInt === 3 || formatInt === 'CODE_39') return 'CODE39';
+      return 'CODE128';
+    }
+
+    // iOS Safari & Mobile Clipboard Paste Helper
+    async function handleClipboardPaste() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text && text.trim() !== '') {
+          lastParsedScan = {
+            value: text.trim(),
+            format: text.trim().length > 20 ? 'QR_CODE' : 'CODE128'
+          };
+          document.getElementById('scan-result-text').innerText = lastParsedScan.value;
+          document.getElementById('scan-result-type').innerText = `剪貼簿內容 (預設: ${lastParsedScan.format})`;
+          document.getElementById('scan-result-box').classList.remove('hidden');
+        } else {
+          alert("剪貼簿中無可用的文字卡號內容");
+        }
+      } catch (err) {
+        alert("無法讀取剪貼簿，請確認權限或嘗試手動貼上。");
+      }
+    }
+
+    function applyScanResultToCurrentStore() {
+      if (!lastParsedScan || !selectedStoreId) return;
+      
+      const store = appData.stores.find(s => s.id === selectedStoreId);
+      if (!store) return;
+
+      if (activeTab === 'member') {
+        store.barcodeValue = lastParsedScan.value;
+        store.barcodeType = lastParsedScan.format;
+      } else {
+        store.pointsBarcodeValue = lastParsedScan.value;
+        store.pointsBarcodeType = lastParsedScan.format;
+      }
+
+      saveAppData();
+      closeScanModal();
+      renderCurrentStoreContent();
+    }
+
+    /* Store Management Modal Functions */
+    function openStoreManageModal(storeId = selectedStoreId) {
+      const modal = document.getElementById('store-modal');
+      const deleteBtn = document.getElementById('delete-store-btn');
+      const title = document.getElementById('modal-title');
+
+      if (storeId) {
+        const store = appData.stores.find(s => s.id === storeId);
+        if (store) {
+          document.getElementById('edit-store-id').value = store.id;
+          document.getElementById('input-store-name').value = store.storeName;
+          document.getElementById('input-member-code').value = store.barcodeValue || '';
+          document.getElementById('input-member-type').value = store.barcodeType || 'CODE128';
+          document.getElementById('input-points-code').value = store.pointsBarcodeValue || '';
+          document.getElementById('input-points-type').value = store.pointsBarcodeType || 'CODE128';
+          title.innerText = "編輯店家條碼";
+          deleteBtn.classList.remove('hidden');
+        }
+      } else {
+        // Add new store
+        document.getElementById('edit-store-id').value = '';
+        document.getElementById('input-store-name').value = '';
+        document.getElementById('input-member-code').value = '';
+        document.getElementById('input-member-type').value = 'CODE128';
+        document.getElementById('input-points-code').value = '';
+        document.getElementById('input-points-type').value = 'CODE128';
+        title.innerText = "新增店家卡片";
+        deleteBtn.classList.add('hidden');
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function openAddBarcodeModalForPoints() {
+      switchTab('points');
+      openStoreManageModal(selectedStoreId);
+    }
+
+    function closeStoreModal() {
+      document.getElementById('store-modal').classList.add('hidden');
+    }
+
+    function saveStoreData() {
+      const editId = document.getElementById('edit-store-id').value;
+      const storeName = document.getElementById('input-store-name').value.trim();
+      const memberCode = document.getElementById('input-member-code').value.trim();
+      const memberType = document.getElementById('input-member-type').value;
+      const pointsCode = document.getElementById('input-points-code').value.trim();
+      const pointsType = document.getElementById('input-points-type').value;
+
+      if (!storeName) {
+        alert("請輸入店家名稱");
+        return;
+      }
+
+      if (editId) {
+        // Update existing store
+        const store = appData.stores.find(s => s.id === editId);
+        if (store) {
+          store.storeName = storeName;
+          store.barcodeValue = memberCode;
+          store.barcodeType = memberType;
+          store.pointsBarcodeValue = pointsCode;
+          store.pointsBarcodeType = pointsType;
+        }
+      } else {
+        // Create new store
+        const newId = "store-" + Date.now();
+        const newStore = {
+          id: newId,
+          order: appData.stores.length + 1,
+          storeName: storeName,
+          barcodeValue: memberCode,
+          barcodeType: memberType,
+          pointsBarcodeValue: pointsCode,
+          pointsBarcodeType: pointsType
+        };
+        appData.stores.push(newStore);
+        selectedStoreId = newId;
+      }
+
+      saveAppData();
+      closeStoreModal();
+      renderStoreNav();
+      renderCurrentStoreContent();
+    }
+
+    function deleteCurrentEditStore() {
+      const editId = document.getElementById('edit-store-id').value;
+      if (!editId) return;
+
+      if (confirm("確定要刪除此店家的會員卡嗎？")) {
+        appData.stores = appData.stores.filter(s => s.id !== editId);
+        if (appData.stores.length > 0) {
+          selectedStoreId = appData.stores[0].id;
+        } else {
+          selectedStoreId = null;
+        }
+        saveAppData();
+        closeStoreModal();
+        renderStoreNav();
+        renderCurrentStoreContent();
+      }
+    }
+
+    /* JSON Backup Export & Import */
+    function exportDataJSON() {
+      const jsonStr = JSON.stringify(appData, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `barcode_wallet_backup_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importDataJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported && Array.isArray(imported.stores)) {
+            appData = imported;
+            if (appData.stores.length > 0) {
+              selectedStoreId = appData.stores[0].id;
+            }
+            saveAppData();
+            renderCarrierBarcode();
+            renderStoreNav();
+            renderCurrentStoreContent();
+            alert("會員卡資料成功匯入！");
+            closeStoreModal();
+          } else {
+            alert("JSON 格式不符");
+          }
+        } catch (err) {
+          alert("匯入失敗，請確認檔案為正確 JSON");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    /* PWA Modal and Exporters */
+    function openPwaGuideModal() {
+      document.getElementById('pwa-guide-modal').classList.remove('hidden');
+    }
+
+    function closePwaGuideModal() {
+      document.getElementById('pwa-guide-modal').classList.add('hidden');
+    }
+
+    function downloadFile(filename, text) {
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+      element.setAttribute('download', filename);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
+
+    function downloadManifestJson() {
+      const manifestContent = JSON.stringify({
+        "name": "條碼與會員卡 PWA",
+        "short_name": "會員條碼卡",
+        "description": "Zero-Hierarchy 單畫面 100% 前端會員卡管理 PWA",
+        "start_url": "./",
+        "display": "fullscreen",
+        "background_color": "#F5F1E8",
+        "theme_color": "#9CA9A5",
+        "icons": [
+          {
+            "src": "./icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+          },
+          {
+            "src": "./icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+          }
+        ]
+      }, null, 2);
+      downloadFile("manifest.json", manifestContent);
+    }
+
+    function downloadSwJs() {
+      const swContent = `// Service Worker for Offline PWA Support
+const CACHE_NAME = 'barcode-pwa-v1';
+const ASSETS_TO_CACHE = [
+  './',
+  './index.html',
+  './manifest.json',
+  'https://cdn.tailwindcss.com',
+  'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+  'https://unpkg.com/@zxing/library@latest/umd/index.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => Promise.all(
+      keys.map((key) => {
+        if (key !== CACHE_NAME) return caches.delete(key);
+      })
+    ))
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      return cachedResponse || fetch(event.request);
+    })
+  );
+});`;
+      downloadFile("sw.js", swContent);
+    }
+
+    function downloadNoJekyll() {
+      downloadFile(".nojekyll", "");
+    }
+
+    function copyManifestSnippet() {
+      const text = `=== manifest.json ===
+{
+  "name": "條碼與會員卡 PWA",
+  "short_name": "會員條碼卡",
+  "start_url": "./",
+  "display": "fullscreen",
+  "background_color": "#F5F1E8",
+  "theme_color": "#9CA9A5"
+}`;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("已成功複製設定資訊至剪貼簿！");
+      }).catch(() => {
+        alert("複製失敗，請手動複製");
+      });
+    }
+
+    /* Initialize Application on Window Load */
+    window.onload = function() {
+      renderCarrierBarcode();
+      renderStoreNav();
+      switchTab('member');
+
+      // Attempt to register dynamic offline Blob ServiceWorker if supported
+      if ('serviceWorker' in navigator) {
+        try {
+          navigator.serviceWorker.register('./sw.js').catch((err) => {
+            console.log("Offline fallback ready (standard SW relative path checked)");
+          });
+        } catch (e) {}
+      }
+    };
+  </script>
+</body>
+</html>
