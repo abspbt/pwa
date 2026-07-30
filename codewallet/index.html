@@ -109,7 +109,7 @@
         <span class="font-bold text-xs tracking-wider uppercase text-[#4A4A47]">會員卡隨身包</span>
       </div>
       <div class="flex items-center space-x-2">
-        <button onclick="openStoreManageModal()" class="flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#4A4A47] hover:text-white transition-colors">
+        <button onclick="openSettingsModal()" class="flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#4A4A47] hover:text-white transition-colors">
           <span class="text-xs font-medium">設定</span>
           <span class="w-6 h-6 flex items-center justify-center">
             <i class="fa-solid fa-gear text-sm"></i>
@@ -150,7 +150,7 @@
       </div>
 
       <!-- Scrollable Tab Row -->
-      <div id="store-nav-container" class="flex overflow-x-auto no-scrollbar space-x-2 px-5 py-1">
+      <div id="store-nav-container" class="flex overflow-x-auto no-scrollbar space-x-2.5 px-5 py-1.5">
         <!-- Store tabs dynamically rendered here -->
       </div>
     </div>
@@ -250,17 +250,6 @@
             </select>
           </div>
         </div>
-
-        <!-- Backup & Restore Section -->
-        <div class="pt-2 border-t border-[#4A4A47]/30 flex gap-2">
-          <button onclick="exportDataJSON()" type="button" class="flex-1 py-1.5 text-xs rounded-lg border border-[#4A4A47] text-[#4A4A47] hover:bg-[#E5E1D6]">
-            <i class="fa-solid fa-download mr-1"></i>匯出 JSON
-          </button>
-          <label class="flex-1 py-1.5 text-xs rounded-lg border border-[#4A4A47] text-[#4A4A47] hover:bg-[#E5E1D6] text-center cursor-pointer">
-            <i class="fa-solid fa-upload mr-1"></i>匯入 JSON
-            <input type="file" id="import-json-file" accept=".json" onchange="importDataJSON(event)" class="hidden">
-          </label>
-        </div>
       </div>
 
       <!-- Modal Footer Action Buttons -->
@@ -273,6 +262,53 @@
         </button>
         <button onclick="saveStoreData()" type="button" class="flex-1 py-2 text-xs bg-[#4A4A47] text-white rounded-lg hover:opacity-85 font-bold transition-colors">
           儲存
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL C: Global Settings (Store List Reordering, Edit/Delete, Backup & Restore) -->
+  <div id="settings-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden backdrop-blur-xs">
+    <div class="bg-[#F5F1E8] w-full max-w-sm rounded-2xl p-5 shadow-xl border border-[#4A4A47] max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center mb-4 shrink-0 border-b border-[#4A4A47]/30 pb-2">
+        <h2 class="text-lg font-bold text-[#4A4A47]">設定</h2>
+        <button onclick="closeSettingsModal()" class="text-[#4A4A47] hover:text-[#4A4A47] text-lg font-bold px-2">✕</button>
+      </div>
+
+      <div class="overflow-y-auto flex-1 space-y-4 pr-1">
+        <!-- Store List Section -->
+        <div>
+          <div class="text-xs font-bold text-[#4A4A47] flex items-center gap-1 mb-2">
+            <i class="fa-solid fa-store text-[#4A4A47]"></i> 店家清單（可調整順序）
+          </div>
+          <div id="settings-store-list" class="space-y-2">
+            <!-- Store rows dynamically rendered here -->
+          </div>
+          <button onclick="closeSettingsModal(); openStoreManageModal(null);" type="button" class="mt-2 w-full py-2 text-xs rounded-lg border border-dashed border-[#4A4A47] text-[#4A4A47] hover:bg-[#E5E1D6] font-medium">
+            <i class="fa-solid fa-plus mr-1"></i>新增店家
+          </button>
+        </div>
+
+        <!-- Backup & Restore Section -->
+        <div class="pt-3 border-t border-[#4A4A47]/30">
+          <div class="text-xs font-bold text-[#4A4A47] flex items-center gap-1 mb-2">
+            <i class="fa-solid fa-box-archive text-[#4A4A47]"></i> 資料備份與還原
+          </div>
+          <div class="flex gap-2">
+            <button onclick="exportDataJSON()" type="button" class="flex-1 py-1.5 text-xs rounded-lg border border-[#4A4A47] text-[#4A4A47] hover:bg-[#E5E1D6]">
+              <i class="fa-solid fa-file-export mr-1"></i>匯出 JSON
+            </button>
+            <label class="flex-1 py-1.5 text-xs rounded-lg border border-[#4A4A47] text-[#4A4A47] hover:bg-[#E5E1D6] text-center cursor-pointer">
+              <i class="fa-solid fa-file-import mr-1"></i>匯入 JSON
+              <input type="file" id="import-json-file" accept=".json" onchange="importDataJSON(event)" class="hidden">
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-[#4A4A47]/30 flex gap-2 shrink-0">
+        <button onclick="closeSettingsModal()" type="button" class="flex-1 py-2 text-xs bg-[#E5E1D6] text-[#4A4A47] rounded-lg hover:bg-[#4A4A47] hover:text-white transition-colors">
+          關閉
         </button>
       </div>
     </div>
@@ -441,7 +477,7 @@
         const isSelected = store.id === selectedStoreId;
         const btn = document.createElement('button');
         
-        btn.className = `px-3.5 py-1.5 text-xs rounded-lg whitespace-nowrap transition-all duration-150 shrink-0 ${
+        btn.className = `px-4 py-2.5 text-sm rounded-lg whitespace-nowrap transition-all duration-150 shrink-0 ${
           isSelected ? 'store-tab-active' : 'store-tab-inactive'
         }`;
         
@@ -452,7 +488,7 @@
 
       // Render Add Store Button at the end of Navbar
       const addBtn = document.createElement('button');
-      addBtn.className = "px-2.5 py-1.5 text-xs rounded-lg whitespace-nowrap bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#4A4A47] hover:text-white shrink-0 font-bold transition-colors";
+      addBtn.className = "px-3 py-2.5 text-sm rounded-lg whitespace-nowrap bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#4A4A47] hover:text-white shrink-0 font-bold transition-colors";
       addBtn.innerHTML = '<i class="fa-solid fa-plus mr-1"></i>新增';
       addBtn.onclick = () => openStoreManageModal(null);
       navContainer.appendChild(addBtn);
@@ -775,6 +811,93 @@
       }
     }
 
+    /* Global Settings Modal Functions (Store List, Reordering, Backup/Restore) */
+    function openSettingsModal() {
+      renderSettingsStoreList();
+      document.getElementById('settings-modal').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settings-modal').classList.add('hidden');
+    }
+
+    // Render the store list inside the Settings modal, with reorder/edit/delete controls
+    function renderSettingsStoreList() {
+      const listContainer = document.getElementById('settings-store-list');
+      if (!listContainer) return;
+
+      listContainer.innerHTML = '';
+
+      appData.stores.forEach((store, index) => {
+        const row = document.createElement('div');
+        row.className = 'bg-white rounded-xl border border-[#4A4A47]/30 p-2 flex items-center gap-2';
+
+        row.innerHTML = `
+          <div class="flex flex-col gap-0.5">
+            <button type="button" class="w-6 h-6 flex items-center justify-center rounded bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#4A4A47] hover:text-white disabled:opacity-30 disabled:pointer-events-none" ${index === 0 ? 'disabled' : ''}>
+              <i class="fa-solid fa-chevron-up text-[10px]"></i>
+            </button>
+            <button type="button" class="w-6 h-6 flex items-center justify-center rounded bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#4A4A47] hover:text-white disabled:opacity-30 disabled:pointer-events-none" ${index === appData.stores.length - 1 ? 'disabled' : ''}>
+              <i class="fa-solid fa-chevron-down text-[10px]"></i>
+            </button>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-[#4A4A47] truncate">${store.storeName}</p>
+            <p class="text-[10px] text-[#4A4A47]/70 font-mono truncate">${store.barcodeValue || '(尚未設定條碼)'}</p>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button type="button" class="w-7 h-7 flex items-center justify-center rounded-lg bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#4A4A47] hover:text-white">
+              <i class="fa-solid fa-pen text-xs"></i>
+            </button>
+            <button type="button" class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-100 text-red-700 hover:bg-red-200">
+              <i class="fa-solid fa-trash text-xs"></i>
+            </button>
+          </div>
+        `;
+
+        const [upBtn, downBtn] = row.querySelectorAll('.flex-col button');
+        const [editBtn, deleteBtn] = row.querySelectorAll('.flex.items-center.gap-1.shrink-0 button');
+
+        upBtn.onclick = () => moveStoreInSettings(store.id, -1);
+        downBtn.onclick = () => moveStoreInSettings(store.id, 1);
+        editBtn.onclick = () => { closeSettingsModal(); openStoreManageModal(store.id); };
+        deleteBtn.onclick = () => deleteStoreFromSettings(store.id);
+
+        listContainer.appendChild(row);
+      });
+    }
+
+    // Swap a store's position with its neighbor (direction: -1 = up, 1 = down)
+    function moveStoreInSettings(storeId, direction) {
+      const index = appData.stores.findIndex(s => s.id === storeId);
+      const targetIndex = index + direction;
+      if (index < 0 || targetIndex < 0 || targetIndex >= appData.stores.length) return;
+
+      const stores = appData.stores;
+      [stores[index], stores[targetIndex]] = [stores[targetIndex], stores[index]];
+
+      saveAppData();
+      renderSettingsStoreList();
+      renderStoreNav();
+    }
+
+    // Delete a store directly from the Settings list (with confirmation)
+    function deleteStoreFromSettings(storeId) {
+      const store = appData.stores.find(s => s.id === storeId);
+      if (!store) return;
+
+      if (confirm(`確定要刪除「${store.storeName}」的會員卡嗎？`)) {
+        appData.stores = appData.stores.filter(s => s.id !== storeId);
+        if (selectedStoreId === storeId) {
+          selectedStoreId = appData.stores.length > 0 ? appData.stores[0].id : null;
+        }
+        saveAppData();
+        renderSettingsStoreList();
+        renderStoreNav();
+        renderCurrentStoreContent();
+      }
+    }
+
     /* JSON Backup Export & Import */
     function exportDataJSON() {
       const jsonStr = JSON.stringify(appData, null, 2);
@@ -806,8 +929,9 @@
             renderCarrierBarcode();
             renderStoreNav();
             renderCurrentStoreContent();
+            renderSettingsStoreList();
             alert("會員卡資料成功匯入！");
-            closeStoreModal();
+            closeSettingsModal();
           } else {
             alert("JSON 格式不符");
           }
