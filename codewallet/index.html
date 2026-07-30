@@ -26,8 +26,8 @@
         extend: {
           colors: {
             bgMain: '#F5F1E8',
-            greyMuted: '#9CA9A5',
-            greyBorder: '#A0A29C',
+            greyMuted: '#4A4A47',
+            greyBorder: '#4A4A47',
             textMain: '#4A4A47',
             recessedBg: '#E5E1D6',
             greySelectedText: '#6B7280',
@@ -65,9 +65,9 @@
       font-weight: 700;
       box-shadow: 0 -2px 6px rgba(0,0,0,0.03);
     }
-    /* Unselected tab: Muted grey #9CA9A5 bg + Rice white text, NO border */
+    /* Unselected tab: Muted grey #4A4A47 bg + Rice white text, NO border */
     .store-tab-inactive {
-      background-color: #9CA9A5 !important;
+      background-color: #4A4A47 !important;
       color: #F5F1E8 !important;
       border: none !important;
       font-weight: 500;
@@ -105,11 +105,11 @@
     <!-- Top Bar: Settings & PWA Export Guide -->
     <div class="flex justify-between items-center px-2 py-1 mb-1 shrink-0">
       <div class="flex items-center space-x-1">
-        <i class="fa-solid fa-wallet text-[#9CA9A5] text-lg"></i>
-        <span class="font-bold text-xs tracking-wider uppercase text-[#9CA9A5]">會員卡隨身包</span>
+        <i class="fa-solid fa-wallet text-[#4A4A47] text-lg"></i>
+        <span class="font-bold text-xs tracking-wider uppercase text-[#4A4A47]">會員卡隨身包</span>
       </div>
       <div class="flex items-center space-x-2">
-        <button onclick="openStoreManageModal()" class="flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#9CA9A5] hover:text-white transition-colors">
+        <button onclick="openStoreManageModal()" class="flex items-center gap-1 pl-2.5 pr-1 py-1 rounded-full bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#4A4A47] hover:text-white transition-colors">
           <span class="text-xs font-medium">設定</span>
           <span class="w-6 h-6 flex items-center justify-center">
             <i class="fa-solid fa-gear text-sm"></i>
@@ -119,21 +119,21 @@
     </div>
 
     <!-- 1. Universal Carrier Barcode (手機通用載具條碼 - 固定常駐頂端，不受滑動影響) -->
-    <div class="bg-white rounded-xl p-3 shadow-sm border border-[#A0A29C]/30 shrink-0 mb-3 relative group">
+    <div class="bg-white rounded-xl p-3 shadow-sm border border-[#4A4A47]/30 shrink-0 mb-3 relative group">
       <div class="flex justify-between items-center mb-1">
         <div class="flex items-center space-x-1.5">
           <i class="fa-solid fa-barcode text-[#4A4A47] text-sm"></i>
           <span class="text-xs font-bold text-[#4A4A47] tracking-wider">手機通用載具</span>
         </div>
-        <button onclick="editCarrierCode()" class="text-[11px] text-[#9CA9A5] hover:text-[#4A4A47] underline flex items-center gap-1">
+        <button onclick="editCarrierCode()" class="text-[11px] text-[#4A4A47] hover:text-[#4A4A47] underline flex items-center gap-1">
           <i class="fa-solid fa-pen text-[10px]"></i>
           <span id="carrier-display-text">/AB12345</span>
         </button>
       </div>
       
       <!-- Barcode Container with Adequate Quiet Zone -->
-      <div class="bg-white p-3 rounded-lg flex flex-col items-center justify-center min-h-[104px]">
-        <svg id="carrier-barcode-svg" class="w-full h-[91px] max-h-[91px]"></svg>
+      <div class="bg-white p-3 rounded-lg flex flex-col items-center justify-center min-h-[94px]">
+        <svg id="carrier-barcode-svg" class="w-full h-[82px] max-h-[82px]"></svg>
       </div>
     </div>
 
@@ -141,12 +141,12 @@
     <div class="relative shrink-0 mb-3">
       <!-- Left Visual Hint Chevron Arrow (Non-clickable visual cue) -->
       <div class="absolute left-0 top-0 bottom-0 w-6 z-10 pointer-events-none flex items-center justify-start bg-gradient-to-r from-[#F5F1E8] to-transparent pl-0.5">
-        <i class="fa-solid fa-chevron-left text-[10px] text-[#9CA9A5]/70"></i>
+        <i class="fa-solid fa-chevron-left text-[10px] text-[#4A4A47]/70"></i>
       </div>
       
       <!-- Right Visual Hint Chevron Arrow (Non-clickable visual cue) -->
       <div class="absolute right-0 top-0 bottom-0 w-6 z-10 pointer-events-none flex items-center justify-end bg-gradient-to-l from-[#F5F1E8] to-transparent pr-0.5">
-        <i class="fa-solid fa-chevron-right text-[10px] text-[#9CA9A5]/70"></i>
+        <i class="fa-solid fa-chevron-right text-[10px] text-[#4A4A47]/70"></i>
       </div>
 
       <!-- Scrollable Tab Row -->
@@ -156,7 +156,7 @@
     </div>
 
     <!-- Content Card Wrapper -->
-    <div class="flex-1 flex flex-col justify-between bg-white rounded-2xl p-4 shadow-sm border border-[#A0A29C]/30 min-h-0 mb-3">
+    <div class="flex-1 flex flex-col justify-between bg-white rounded-2xl p-4 shadow-sm border border-[#4A4A47]/30 min-h-0 mb-3">
       
       <!-- 4. Selected Store Name (大字顯示防呆確認) -->
       <div class="text-center py-1 border-b border-gray-100 shrink-0">
@@ -179,9 +179,9 @@
 
         <!-- Empty State Prompt if member barcode is missing -->
         <div id="empty-barcode-state" class="hidden flex flex-col items-center justify-center text-center p-4">
-          <i class="fa-solid fa-circle-exclamation text-3xl text-[#9CA9A5] mb-2"></i>
+          <i class="fa-solid fa-circle-exclamation text-3xl text-[#4A4A47] mb-2"></i>
           <p class="text-xs text-[#4A4A47] font-medium">本店家尚未設定會員條碼</p>
-          <button onclick="openStoreManageModal(selectedStoreId)" class="mt-2 text-xs text-white bg-[#9CA9A5] px-3 py-1.5 rounded-lg hover:bg-[#4A4A47] transition-colors">
+          <button onclick="openStoreManageModal(selectedStoreId)" class="mt-2 text-xs text-white bg-[#4A4A47] px-3 py-1.5 rounded-lg hover:opacity-85 transition-colors">
             + 新增條碼
           </button>
         </div>
@@ -194,7 +194,7 @@
 
       <!-- Quick Action Floating Tools inside Card -->
       <div class="flex justify-end gap-2 border-t border-gray-100 pt-2 shrink-0">
-        <button onclick="openScanModal()" class="text-xs text-[#9CA9A5] hover:text-[#4A4A47] px-2 py-1 rounded flex items-center gap-1">
+        <button onclick="openScanModal()" class="text-xs text-[#4A4A47] hover:text-[#4A4A47] px-2 py-1 rounded flex items-center gap-1">
           <i class="fa-solid fa-camera"></i>
           <span>掃碼/貼上新增</span>
         </button>
@@ -202,7 +202,7 @@
     </div>
 
     <!-- 6. Warning & Notice Text (固定顯示於主畫面，不做 Modal/WakeLock) -->
-    <div class="shrink-0 bg-[#E5E1D6]/60 rounded-xl p-2.5 text-center text-xs space-y-0.5 border border-[#A0A29C]/20">
+    <div class="shrink-0 bg-[#E5E1D6]/60 rounded-xl p-2.5 text-center text-xs space-y-0.5 border border-[#4A4A47]/20">
       <p id="notice-dynamic-text" class="font-bold text-[#4A4A47]">
         7-ELEVEN，會員條碼
       </p>
@@ -215,10 +215,10 @@
 
   <!-- MODAL A: Store Management Modal (Add, Edit, Delete, Backup) -->
   <div id="store-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden backdrop-blur-xs">
-    <div class="bg-[#F5F1E8] w-full max-w-sm rounded-2xl p-5 shadow-xl border border-[#A0A29C] max-h-[90vh] flex flex-col">
-      <div class="flex justify-between items-center mb-4 shrink-0 border-b border-[#A0A29C]/30 pb-2">
+    <div class="bg-[#F5F1E8] w-full max-w-sm rounded-2xl p-5 shadow-xl border border-[#4A4A47] max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center mb-4 shrink-0 border-b border-[#4A4A47]/30 pb-2">
         <h2 id="modal-title" class="text-lg font-bold text-[#4A4A47]">店家與條碼管理</h2>
-        <button onclick="closeStoreModal()" class="text-[#9CA9A5] hover:text-[#4A4A47] text-lg font-bold px-2">✕</button>
+        <button onclick="closeStoreModal()" class="text-[#4A4A47] hover:text-[#4A4A47] text-lg font-bold px-2">✕</button>
       </div>
 
       <!-- Form Content -->
@@ -227,21 +227,21 @@
 
         <div>
           <label class="block text-xs font-bold text-[#4A4A47] mb-1">店家名稱 *</label>
-          <input type="text" id="input-store-name" placeholder="例如: 7-ELEVEN" class="w-full p-2 text-sm rounded-lg border border-[#A0A29C] bg-white focus:outline-none focus:ring-1 focus:ring-[#9CA9A5]">
+          <input type="text" id="input-store-name" placeholder="例如: 7-ELEVEN" class="w-full p-2 text-sm rounded-lg border border-[#4A4A47] bg-white focus:outline-none focus:ring-1 focus:ring-[#4A4A47]">
         </div>
 
         <!-- Member Barcode Group -->
-        <div class="bg-white p-3 rounded-xl border border-[#A0A29C]/40 space-y-2">
+        <div class="bg-white p-3 rounded-xl border border-[#4A4A47]/40 space-y-2">
           <div class="text-xs font-bold text-[#4A4A47] flex items-center gap-1 border-b pb-1">
-            <i class="fa-solid fa-id-card text-[#9CA9A5]"></i> 會員條碼資訊
+            <i class="fa-solid fa-id-card text-[#4A4A47]"></i> 會員條碼資訊
           </div>
           <div>
             <label class="block text-[11px] text-[#4A4A47] mb-1">會員卡號 / 條碼內容 *</label>
-            <input type="text" id="input-member-code" placeholder="請輸入條碼字串" class="w-full p-2 text-sm rounded-lg border border-[#A0A29C] bg-[#F5F1E8]/30 font-mono">
+            <input type="text" id="input-member-code" placeholder="請輸入條碼字串" class="w-full p-2 text-sm rounded-lg border border-[#4A4A47] bg-[#F5F1E8]/30 font-mono">
           </div>
           <div>
             <label class="block text-[11px] text-[#4A4A47] mb-1">條碼類型</label>
-            <select id="input-member-type" class="w-full p-2 text-xs rounded-lg border border-[#A0A29C] bg-white">
+            <select id="input-member-type" class="w-full p-2 text-xs rounded-lg border border-[#4A4A47] bg-white">
               <option value="CODE128">一維條碼 (CODE128)</option>
               <option value="EAN13">一維條碼 (EAN-13)</option>
               <option value="EAN8">一維條碼 (EAN-8)</option>
@@ -252,11 +252,11 @@
         </div>
 
         <!-- Backup & Restore Section -->
-        <div class="pt-2 border-t border-[#A0A29C]/30 flex gap-2">
-          <button onclick="exportDataJSON()" type="button" class="flex-1 py-1.5 text-xs rounded-lg border border-[#9CA9A5] text-[#4A4A47] hover:bg-[#E5E1D6]">
+        <div class="pt-2 border-t border-[#4A4A47]/30 flex gap-2">
+          <button onclick="exportDataJSON()" type="button" class="flex-1 py-1.5 text-xs rounded-lg border border-[#4A4A47] text-[#4A4A47] hover:bg-[#E5E1D6]">
             <i class="fa-solid fa-download mr-1"></i>匯出 JSON
           </button>
-          <label class="flex-1 py-1.5 text-xs rounded-lg border border-[#9CA9A5] text-[#4A4A47] hover:bg-[#E5E1D6] text-center cursor-pointer">
+          <label class="flex-1 py-1.5 text-xs rounded-lg border border-[#4A4A47] text-[#4A4A47] hover:bg-[#E5E1D6] text-center cursor-pointer">
             <i class="fa-solid fa-upload mr-1"></i>匯入 JSON
             <input type="file" id="import-json-file" accept=".json" onchange="importDataJSON(event)" class="hidden">
           </label>
@@ -264,14 +264,14 @@
       </div>
 
       <!-- Modal Footer Action Buttons -->
-      <div class="mt-4 pt-3 border-t border-[#A0A29C]/30 flex gap-2 shrink-0">
+      <div class="mt-4 pt-3 border-t border-[#4A4A47]/30 flex gap-2 shrink-0">
         <button id="delete-store-btn" onclick="deleteCurrentEditStore()" type="button" class="px-3 py-2 text-xs bg-red-100 text-red-700 rounded-lg hover:bg-red-200 hidden">
           刪除
         </button>
-        <button onclick="closeStoreModal()" type="button" class="flex-1 py-2 text-xs bg-[#E5E1D6] text-[#4A4A47] rounded-lg hover:bg-[#9CA9A5] hover:text-white transition-colors">
+        <button onclick="closeStoreModal()" type="button" class="flex-1 py-2 text-xs bg-[#E5E1D6] text-[#4A4A47] rounded-lg hover:bg-[#4A4A47] hover:text-white transition-colors">
           取消
         </button>
-        <button onclick="saveStoreData()" type="button" class="flex-1 py-2 text-xs bg-[#9CA9A5] text-white rounded-lg hover:bg-[#4A4A47] font-bold transition-colors">
+        <button onclick="saveStoreData()" type="button" class="flex-1 py-2 text-xs bg-[#4A4A47] text-white rounded-lg hover:opacity-85 font-bold transition-colors">
           儲存
         </button>
       </div>
@@ -280,10 +280,10 @@
 
   <!-- MODAL B: Scanner / Image Upload / Clipboard Barcode Recognition -->
   <div id="scan-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden backdrop-blur-xs">
-    <div class="bg-[#F5F1E8] w-full max-w-sm rounded-2xl p-5 shadow-xl border border-[#A0A29C]">
-      <div class="flex justify-between items-center mb-3 border-b border-[#A0A29C]/30 pb-2">
+    <div class="bg-[#F5F1E8] w-full max-w-sm rounded-2xl p-5 shadow-xl border border-[#4A4A47]">
+      <div class="flex justify-between items-center mb-3 border-b border-[#4A4A47]/30 pb-2">
         <h2 class="text-base font-bold text-[#4A4A47]">條碼解析辨識</h2>
-        <button onclick="closeScanModal()" class="text-[#9CA9A5] hover:text-[#4A4A47] text-lg font-bold px-2">✕</button>
+        <button onclick="closeScanModal()" class="text-[#4A4A47] hover:text-[#4A4A47] text-lg font-bold px-2">✕</button>
       </div>
 
       <p class="text-xs text-[#4A4A47]/80 mb-4">
@@ -292,16 +292,16 @@
 
       <div class="space-y-3">
         <!-- 1. File Upload Recognition -->
-        <label class="block w-full p-4 border-2 border-dashed border-[#9CA9A5] rounded-xl text-center cursor-pointer bg-white hover:bg-[#F5F1E8]/50 transition-colors">
-          <i class="fa-solid fa-file-image text-2xl text-[#9CA9A5] mb-1"></i>
+        <label class="block w-full p-4 border-2 border-dashed border-[#4A4A47] rounded-xl text-center cursor-pointer bg-white hover:bg-[#F5F1E8]/50 transition-colors">
+          <i class="fa-solid fa-file-image text-2xl text-[#4A4A47] mb-1"></i>
           <span class="block text-xs font-bold text-[#4A4A47]">上傳條碼照片 / 截圖</span>
-          <span class="block text-[10px] text-[#9CA9A5] mt-0.5">支援 JPG, PNG, WEBP</span>
+          <span class="block text-[10px] text-[#4A4A47] mt-0.5">支援 JPG, PNG, WEBP</span>
           <input type="file" id="scan-file-input" accept="image/*" onchange="handleImageScan(event)" class="hidden">
         </label>
 
         <!-- 2. Clipboard Paste for iOS Safari -->
-        <button onclick="handleClipboardPaste()" class="w-full py-3 bg-white border border-[#A0A29C] rounded-xl text-xs font-bold text-[#4A4A47] hover:bg-[#E5E1D6] transition-colors flex items-center justify-center gap-2">
-          <i class="fa-solid fa-paste text-[#9CA9A5]"></i>
+        <button onclick="handleClipboardPaste()" class="w-full py-3 bg-white border border-[#4A4A47] rounded-xl text-xs font-bold text-[#4A4A47] hover:bg-[#E5E1D6] transition-colors flex items-center justify-center gap-2">
+          <i class="fa-solid fa-paste text-[#4A4A47]"></i>
           <span>讀取剪貼簿內容 / 貼上條碼</span>
         </button>
       </div>
@@ -318,8 +318,8 @@
         </button>
       </div>
 
-      <div class="mt-4 pt-2 border-t border-[#A0A29C]/30 text-right">
-        <button onclick="closeScanModal()" class="px-4 py-1.5 text-xs bg-[#E5E1D6] text-[#4A4A47] rounded-lg hover:bg-[#9CA9A5] hover:text-white">
+      <div class="mt-4 pt-2 border-t border-[#4A4A47]/30 text-right">
+        <button onclick="closeScanModal()" class="px-4 py-1.5 text-xs bg-[#E5E1D6] text-[#4A4A47] rounded-lg hover:bg-[#4A4A47] hover:text-white">
           關閉
         </button>
       </div>
@@ -397,10 +397,10 @@
       try {
         JsBarcode("#carrier-barcode-svg", appData.carrier || "/AB12345", {
           format: appData.carrierType || "CODE39",
-          width: 2.3,
-          height: 81,
+          width: 2.1,
+          height: 73,
           displayValue: true,
-          fontSize: 13,
+          fontSize: 12,
           margin: 0,
           background: "#ffffff",
           lineColor: "#000000"
@@ -410,10 +410,10 @@
         try {
           JsBarcode("#carrier-barcode-svg", appData.carrier || "/AB12345", {
             format: "CODE128",
-            width: 1.9,
-            height: 48,
+            width: 1.7,
+            height: 43,
             displayValue: true,
-            fontSize: 11,
+            fontSize: 10,
             margin: 0
           });
         } catch(e){}
@@ -452,7 +452,7 @@
 
       // Render Add Store Button at the end of Navbar
       const addBtn = document.createElement('button');
-      addBtn.className = "px-2.5 py-1.5 text-xs rounded-lg whitespace-nowrap bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#9CA9A5] hover:text-white shrink-0 font-bold transition-colors";
+      addBtn.className = "px-2.5 py-1.5 text-xs rounded-lg whitespace-nowrap bg-[#E5E1D6] text-[#4A4A47] hover:bg-[#4A4A47] hover:text-white shrink-0 font-bold transition-colors";
       addBtn.innerHTML = '<i class="fa-solid fa-plus mr-1"></i>新增';
       addBtn.onclick = () => openStoreManageModal(null);
       navContainer.appendChild(addBtn);
@@ -837,7 +837,7 @@
         "start_url": "./",
         "display": "fullscreen",
         "background_color": "#F5F1E8",
-        "theme_color": "#9CA9A5",
+        "theme_color": "#4A4A47",
         "icons": [
           {
             "src": "data:image/png;base64,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",
@@ -912,7 +912,7 @@ self.addEventListener('fetch', (event) => {
   "start_url": "./",
   "display": "fullscreen",
   "background_color": "#F5F1E8",
-  "theme_color": "#9CA9A5"
+  "theme_color": "#4A4A47"
 }`;
       navigator.clipboard.writeText(text).then(() => {
         alert("已成功複製設定資訊至剪貼簿！");
