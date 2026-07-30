@@ -127,13 +127,18 @@
         </div>
         <button onclick="editCarrierCode()" class="text-[11px] text-[#4A4A47] hover:text-[#4A4A47] underline flex items-center gap-1">
           <i class="fa-solid fa-pen text-[10px]"></i>
-          <span id="carrier-display-text">/AB12345</span>
+          <span id="carrier-display-text">尚未設定</span>
         </button>
       </div>
       
       <!-- Barcode Container with Adequate Quiet Zone -->
       <div class="bg-white p-3 rounded-lg flex flex-col items-center justify-center min-h-[96px]">
-        <svg id="carrier-barcode-svg" class="w-full h-[84px] max-h-[84px]"></svg>
+        <svg id="carrier-barcode-svg" class="w-full h-[84px] max-h-[84px] hidden"></svg>
+        <!-- Empty State Prompt if carrier code is not yet set -->
+        <button id="carrier-empty-state" onclick="editCarrierCode()" class="hidden flex flex-col items-center justify-center text-center w-full">
+          <i class="fa-solid fa-circle-plus text-2xl text-[#4A4A47]/60 mb-1"></i>
+          <span class="text-xs text-[#4A4A47]/80">點此新增手機通用載具條碼</span>
+        </button>
       </div>
     </div>
 
@@ -157,54 +162,67 @@
 
     <!-- Content Card Wrapper -->
     <div class="flex-1 flex flex-col justify-between bg-white rounded-2xl p-4 shadow-sm border border-[#4A4A47]/30 min-h-0 mb-3">
-      
-      <!-- 4. Selected Store Name (大字顯示防呆確認) -->
-      <div class="text-center py-1 border-b border-gray-100 shrink-0">
-        <h1 id="current-store-name" class="text-2xl font-black text-[#4A4A47] tracking-wide truncate">
-          7-ELEVEN
-        </h1>
+
+      <!-- No Store At All State (全新使用者尚未新增任何店家時顯示) -->
+      <div id="no-store-state" class="hidden flex-1 flex flex-col items-center justify-center text-center p-4">
+        <i class="fa-solid fa-store-slash text-4xl text-[#4A4A47]/60 mb-3"></i>
+        <p class="text-sm font-bold text-[#4A4A47] mb-1">尚未新增任何店家</p>
+        <p class="text-xs text-[#4A4A47]/70 mb-3">新增你的第一家店會員卡，開始使用條碼錢包</p>
+        <button onclick="openStoreManageModal(null)" class="text-xs text-white bg-[#4A4A47] px-4 py-2 rounded-lg hover:opacity-85 transition-colors font-bold">
+          <i class="fa-solid fa-plus mr-1"></i>新增第一家店家
+        </button>
       </div>
 
-      <!-- 4. Dynamic Barcode Area (顯示會員條碼 + 卡號) -->
-      <div class="flex-1 flex flex-col items-center justify-center my-2 min-h-[160px] relative">
-        <!-- SVG Barcode element for Linear formats (Code128, EAN, etc) -->
-        <div id="linear-barcode-wrapper" class="w-full flex flex-col items-center justify-center">
-          <svg id="store-barcode-svg" class="w-full max-h-32"></svg>
-        </div>
-        
-        <!-- Canvas/Div element for QR Code format -->
-        <div id="qr-barcode-wrapper" class="hidden flex flex-col items-center justify-center p-2 bg-white rounded-lg">
-          <div id="qrcode-canvas-container"></div>
+      <!-- Store Content Wrapper (有店家時顯示) -->
+      <div id="store-content-wrapper" class="hidden flex-1 flex flex-col justify-between min-h-0">
+
+        <!-- 4. Selected Store Name (大字顯示防呆確認) -->
+        <div class="text-center py-1 border-b border-gray-100 shrink-0">
+          <h1 id="current-store-name" class="text-2xl font-black text-[#4A4A47] tracking-wide truncate">
+            &nbsp;
+          </h1>
         </div>
 
-        <!-- Empty State Prompt if member barcode is missing -->
-        <div id="empty-barcode-state" class="hidden flex flex-col items-center justify-center text-center p-4">
-          <i class="fa-solid fa-circle-exclamation text-3xl text-[#4A4A47] mb-2"></i>
-          <p class="text-xs text-[#4A4A47] font-medium">本店家尚未設定會員條碼</p>
-          <button onclick="openStoreManageModal(selectedStoreId)" class="mt-2 text-xs text-white bg-[#4A4A47] px-3 py-1.5 rounded-lg hover:opacity-85 transition-colors">
-            + 新增條碼
+        <!-- 4. Dynamic Barcode Area (顯示會員條碼 + 卡號) -->
+        <div class="flex-1 flex flex-col items-center justify-center my-2 min-h-[160px] relative">
+          <!-- SVG Barcode element for Linear formats (Code128, EAN, etc) -->
+          <div id="linear-barcode-wrapper" class="w-full flex flex-col items-center justify-center">
+            <svg id="store-barcode-svg" class="w-full max-h-32"></svg>
+          </div>
+
+          <!-- Canvas/Div element for QR Code format -->
+          <div id="qr-barcode-wrapper" class="hidden flex flex-col items-center justify-center p-2 bg-white rounded-lg">
+            <div id="qrcode-canvas-container"></div>
+          </div>
+
+          <!-- Empty State Prompt if member barcode is missing -->
+          <div id="empty-barcode-state" class="hidden flex flex-col items-center justify-center text-center p-4">
+            <i class="fa-solid fa-circle-exclamation text-3xl text-[#4A4A47] mb-2"></i>
+            <p class="text-xs text-[#4A4A47] font-medium">本店家尚未設定會員條碼</p>
+            <button onclick="openStoreManageModal(selectedStoreId)" class="mt-2 text-xs text-white bg-[#4A4A47] px-3 py-1.5 rounded-lg hover:opacity-85 transition-colors">
+              + 新增條碼
+            </button>
+          </div>
+
+          <!-- Barcode Text String Display -->
+          <div id="barcode-value-text" class="mt-2 text-center font-mono text-sm tracking-widest font-bold text-[#4A4A47]">
+          </div>
+        </div>
+
+        <!-- Quick Action Floating Tools inside Card -->
+        <div class="flex justify-end gap-2 border-t border-gray-100 pt-2 shrink-0">
+          <button onclick="openScanModal('quick')" class="text-xs text-[#4A4A47] hover:text-[#4A4A47] px-2 py-1 rounded flex items-center gap-1">
+            <i class="fa-solid fa-camera"></i>
+            <span>重新掃描條碼</span>
           </button>
         </div>
-
-        <!-- Barcode Text String Display -->
-        <div id="barcode-value-text" class="mt-2 text-center font-mono text-sm tracking-widest font-bold text-[#4A4A47]">
-          4710012345678
-        </div>
-      </div>
-
-      <!-- Quick Action Floating Tools inside Card -->
-      <div class="flex justify-end gap-2 border-t border-gray-100 pt-2 shrink-0">
-        <button onclick="openScanModal()" class="text-xs text-[#4A4A47] hover:text-[#4A4A47] px-2 py-1 rounded flex items-center gap-1">
-          <i class="fa-solid fa-camera"></i>
-          <span>掃碼/貼上新增</span>
-        </button>
       </div>
     </div>
 
     <!-- 6. Warning & Notice Text (固定顯示於主畫面，不做 Modal/WakeLock) -->
-    <div class="shrink-0 bg-[#E5E1D6]/60 rounded-xl p-2.5 text-center text-xs space-y-0.5 border border-[#4A4A47]/20">
+    <div id="notice-box" class="shrink-0 bg-[#E5E1D6]/60 rounded-xl p-2.5 text-center text-xs space-y-0.5 border border-[#4A4A47]/20">
       <p id="notice-dynamic-text" class="font-bold text-[#4A4A47]">
-        7-ELEVEN，會員條碼
+        &nbsp;
       </p>
       <p class="text-[11px] text-[#4A4A47]/80">
         如果掃描失敗，請將螢幕亮度調整到最亮
@@ -236,8 +254,13 @@
             <i class="fa-solid fa-id-card text-[#4A4A47]"></i> 會員條碼資訊
           </div>
           <div>
-            <label class="block text-[11px] text-[#4A4A47] mb-1">會員卡號 / 條碼內容 *</label>
-            <input type="text" id="input-member-code" placeholder="請輸入條碼字串" class="w-full p-2 text-sm rounded-lg border border-[#4A4A47] bg-[#F5F1E8]/30 font-mono">
+            <div class="flex justify-between items-center mb-1">
+              <label class="block text-[11px] text-[#4A4A47]">會員卡號 / 條碼內容 *</label>
+              <button type="button" onclick="openScanModal('form')" class="text-[11px] text-[#4A4A47] underline flex items-center gap-1">
+                <i class="fa-solid fa-camera text-[10px]"></i>掃描/貼上
+              </button>
+            </div>
+            <input type="text" id="input-member-code" placeholder="請輸入條碼字串，或使用上方掃描" class="w-full p-2 text-sm rounded-lg border border-[#4A4A47] bg-[#F5F1E8]/30 font-mono">
           </div>
           <div>
             <label class="block text-[11px] text-[#4A4A47] mb-1">條碼類型</label>
@@ -349,8 +372,8 @@
         </div>
         <p id="scan-result-text" class="text-xs font-mono text-gray-800 break-all"></p>
         <p id="scan-result-type" class="text-[10px] text-gray-500 mt-1"></p>
-        <button onclick="applyScanResultToCurrentStore()" class="mt-2 w-full py-1.5 text-xs bg-green-700 text-white font-bold rounded-lg hover:bg-green-800">
-          填入當前店家卡號
+        <button onclick="applyScanResult()" class="mt-2 w-full py-1.5 text-xs bg-green-700 text-white font-bold rounded-lg hover:bg-green-800">
+          使用此結果
         </button>
       </div>
 
@@ -362,37 +385,31 @@
     </div>
   </div>
 
+  <!-- Backup Reminder Toast (非阻擋式提示，新增店家後短暫顯示) -->
+  <div id="backup-reminder-toast" class="hidden fixed left-4 right-4 bottom-4 z-[60] max-w-sm mx-auto">
+    <div class="bg-[#4A4A47] text-[#F5F1E8] rounded-xl shadow-xl px-4 py-3 flex items-center gap-3">
+      <i class="fa-solid fa-box-archive text-lg shrink-0"></i>
+      <div class="flex-1 text-xs leading-snug">
+        已新增店家，建議定期備份資料，避免資料遺失。
+      </div>
+      <button onclick="exportDataJSON(); dismissBackupReminderToast();" type="button" class="shrink-0 text-xs font-bold bg-[#F5F1E8] text-[#4A4A47] px-2.5 py-1.5 rounded-lg hover:opacity-85">
+        立即匯出
+      </button>
+      <button onclick="dismissBackupReminderToast()" type="button" class="shrink-0 text-[#F5F1E8]/70 hover:text-[#F5F1E8] px-1">
+        ✕
+      </button>
+    </div>
+  </div>
+
   <script>
     /* Global Storage Key & Initial Preset Data */
     const STORAGE_KEY = 'pwa_barcode_wallet_v2';
 
     // Preset Default Data
     const defaultData = {
-      carrier: "/AB12345",
+      carrier: "",
       carrierType: "CODE39",
-      stores: [
-        {
-          id: "store-711",
-          order: 1,
-          storeName: "7-ELEVEN",
-          barcodeValue: "4710012345678",
-          barcodeType: "CODE128",
-        },
-        {
-          id: "store-family",
-          order: 2,
-          storeName: "全家便利商店",
-          barcodeValue: "FM88887777666",
-          barcodeType: "CODE128",
-        },
-        {
-          id: "store-poya",
-          order: 3,
-          storeName: "寶雅",
-          barcodeValue: "PY55556666777",
-          barcodeType: "CODE128",
-        }
-      ]
+      stores: []
     };
 
     // Application State Variables
@@ -428,10 +445,26 @@
     function renderCarrierBarcode() {
       const carrierSvg = document.getElementById('carrier-barcode-svg');
       const carrierText = document.getElementById('carrier-display-text');
-      if (carrierText) carrierText.innerText = appData.carrier || "/AB12345";
-      
+      const carrierEmptyState = document.getElementById('carrier-empty-state');
+      const carrierValue = (appData.carrier || '').trim();
+
+      if (carrierText) carrierText.innerText = carrierValue || "尚未設定";
+
+      if (!carrierValue) {
+        // No carrier code set yet: show prompt instead of a fallback barcode
+        if (carrierSvg) {
+          carrierSvg.classList.add('hidden');
+          carrierSvg.innerHTML = '';
+        }
+        if (carrierEmptyState) carrierEmptyState.classList.remove('hidden');
+        return;
+      }
+
+      if (carrierEmptyState) carrierEmptyState.classList.add('hidden');
+      if (carrierSvg) carrierSvg.classList.remove('hidden');
+
       try {
-        JsBarcode("#carrier-barcode-svg", appData.carrier || "/AB12345", {
+        JsBarcode("#carrier-barcode-svg", carrierValue, {
           format: appData.carrierType || "CODE39",
           width: 2.2,
           height: 75,
@@ -444,7 +477,7 @@
       } catch (err) {
         console.warn("Carrier barcode render error, fallback to CODE128:", err);
         try {
-          JsBarcode("#carrier-barcode-svg", appData.carrier || "/AB12345", {
+          JsBarcode("#carrier-barcode-svg", carrierValue, {
             format: "CODE128",
             width: 1.8,
             height: 45,
@@ -512,6 +545,22 @@
 
     // Render Selected Store Details, Barcode & Notice
     function renderCurrentStoreContent() {
+      const noStoreState = document.getElementById('no-store-state');
+      const storeContentWrapper = document.getElementById('store-content-wrapper');
+      const noticeBox = document.getElementById('notice-box');
+
+      if (appData.stores.length === 0) {
+        // No stores at all: show the dedicated "add your first store" prompt
+        if (noStoreState) noStoreState.classList.remove('hidden');
+        if (storeContentWrapper) storeContentWrapper.classList.add('hidden');
+        if (noticeBox) noticeBox.classList.add('hidden');
+        return;
+      }
+
+      if (noStoreState) noStoreState.classList.add('hidden');
+      if (storeContentWrapper) storeContentWrapper.classList.remove('hidden');
+      if (noticeBox) noticeBox.classList.remove('hidden');
+
       const store = appData.stores.find(s => s.id === selectedStoreId);
       if (!store) return;
 
@@ -589,7 +638,10 @@
     }
 
     /* Barcode Scanner & Image Decoder Functions */
-    function openScanModal() {
+    let scanApplyMode = 'quick'; // 'quick' = write directly to currently selected store; 'form' = fill back into the store form fields
+
+    function openScanModal(mode = 'quick') {
+      scanApplyMode = mode;
       document.getElementById('scan-result-box').classList.add('hidden');
       document.getElementById('scan-modal').classList.remove('hidden');
     }
@@ -707,9 +759,19 @@
       }
     }
 
-    function applyScanResultToCurrentStore() {
-      if (!lastParsedScan || !selectedStoreId) return;
-      
+    function applyScanResult() {
+      if (!lastParsedScan) return;
+
+      if (scanApplyMode === 'form') {
+        // Fill the result back into the store form fields; user still needs to press "儲存"
+        document.getElementById('input-member-code').value = lastParsedScan.value;
+        document.getElementById('input-member-type').value = lastParsedScan.format;
+        closeScanModal();
+        return;
+      }
+
+      // Quick mode: write directly to the currently selected store
+      if (!selectedStoreId) return;
       const store = appData.stores.find(s => s.id === selectedStoreId);
       if (!store) return;
 
@@ -754,6 +816,31 @@
       document.getElementById('store-modal').classList.add('hidden');
     }
 
+    /* Backup Reminder Toast Functions */
+    let backupToastTimer = null;
+
+    function showBackupReminderToast() {
+      const toast = document.getElementById('backup-reminder-toast');
+      if (!toast) return;
+
+      toast.classList.remove('hidden');
+
+      // Reset auto-dismiss timer each time it's shown
+      if (backupToastTimer) clearTimeout(backupToastTimer);
+      backupToastTimer = setTimeout(() => {
+        dismissBackupReminderToast();
+      }, 6000);
+    }
+
+    function dismissBackupReminderToast() {
+      const toast = document.getElementById('backup-reminder-toast');
+      if (toast) toast.classList.add('hidden');
+      if (backupToastTimer) {
+        clearTimeout(backupToastTimer);
+        backupToastTimer = null;
+      }
+    }
+
     function saveStoreData() {
       const editId = document.getElementById('edit-store-id').value;
       const storeName = document.getElementById('input-store-name').value.trim();
@@ -764,6 +851,8 @@
         alert("請輸入店家名稱");
         return;
       }
+
+      const isNewStore = !editId;
 
       if (editId) {
         // Update existing store
@@ -791,6 +880,10 @@
       closeStoreModal();
       renderStoreNav();
       renderCurrentStoreContent();
+
+      if (isNewStore) {
+        showBackupReminderToast();
+      }
     }
 
     function deleteCurrentEditStore() {
