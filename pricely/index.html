@@ -257,26 +257,30 @@
   .calc-display{
     flex:0 0 auto;
     margin:10px 16px 8px;
-    padding:10px 18px;
-    min-height:52px;
-    display:flex; flex-direction:column; align-items:flex-end; justify-content:center;
+    padding:4px 18px;
+    height:72px;
+    display:flex; align-items:center; gap:8px;
     background:var(--color-surface);
     border:1px solid var(--color-border);
     border-radius:20px;
     box-shadow:0 1px 3px rgba(51,48,42,.06);
   }
+  /* 算式（例如「208 ÷」）跟數字同一行靠左放，不另外佔用高度 */
   .calc-display .calc-expr{
-    font-family:var(--font-mono); font-size:12.5px;
+    flex:0 0 auto;
+    font-family:var(--font-mono); font-size:12px;
     color:var(--color-text-muted);
-    min-height:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; overflow:hidden; max-width:38%;
   }
+  /* 收緊行高讓數字幾乎撐滿整個框；字級再由 JS 依實際位數自動縮放，位數少就放到最大 */
   .calc-display .calc-value{
+    flex:1 1 auto; min-width:0;
     font-family:'JetBrains Mono', var(--font-mono); font-weight:700;
-    font-size:clamp(30px, 9vw, 44px); line-height:1.2;
+    font-size:var(--calc-font-size, 76px); line-height:.78;
     letter-spacing:.5px;
     color:var(--color-text);
-    width:100%; text-align:right;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    text-align:right;
+    white-space:nowrap;
     font-variant-numeric:tabular-nums;
   }
 
@@ -447,12 +451,28 @@
       return b;
     }
 
+    // 讓數字盡量用最大字級顯示，只有位數多到一行放不下時才逐步縮小
+    const FONT_MAX = 76, FONT_MIN = 24;
+    function fitValueText(){
+      let size = FONT_MAX;
+      valueEl.style.setProperty('--calc-font-size', size + 'px');
+      while(valueEl.scrollWidth > valueEl.clientWidth + 0.5 && size > FONT_MIN){
+        size -= 2;
+        valueEl.style.setProperty('--calc-font-size', size + 'px');
+      }
+    }
+
     function render(){
       valueEl.textContent = display === 'ERR' ? '錯誤' : display;
       exprEl.textContent = (prevValue !== null && operator)
         ? (formatNumber(prevValue) + ' ' + OP_SYMBOL[operator])
         : ' ';
+      fitValueText();
     }
+
+    // 字型載入完成／畫面寬度改變後，重新算一次最合適的字級
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitValueText);
+    window.addEventListener('resize', fitValueText);
 
     function reset(){
       display = '0'; prevValue = null; operator = null; waitingForNewInput = false;
