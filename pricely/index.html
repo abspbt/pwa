@@ -13,7 +13,7 @@
 <title>單價比一比</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --color-bg:#F4F0E6;
@@ -29,6 +29,8 @@
     --font-display:'Space Grotesk', sans-serif;
     --font-body:'Inter', sans-serif;
     --font-mono:'IBM Plex Mono', monospace;
+    /* 數字專用字型：Inter 的 0 是乾淨的橢圓（中間沒有點／斜線），辨識度最高 */
+    --font-number:'Inter', system-ui, sans-serif;
     --row-h:60px;
     --head-h:44px;
     --label-w:84px;
@@ -212,7 +214,8 @@
     width:100%; height:36px;
     border:1px solid var(--color-border-strong);
     border-radius:8px; background:var(--color-bg);
-    font-family:var(--font-mono); font-size:16px; font-weight:600;
+    font-family:var(--font-number); font-size:16px; font-weight:600;
+    font-variant-numeric:tabular-nums;
     color:var(--color-text); text-align:center; padding:0 4px;
     -moz-appearance:textfield; touch-action:manipulation;
   }
@@ -224,7 +227,7 @@
   }
   .col input::placeholder{ color:#C9BFA9; font-weight:500; }
 
-  .result{ font-family:var(--font-mono); font-size:14px; font-weight:600; color:var(--color-text-muted); }
+  .result{ font-family:var(--font-number); font-size:14px; font-weight:600; color:var(--color-text-muted); font-variant-numeric:tabular-nums; }
   .result.filled{ color:var(--color-text); }
   .result .unit{ display:block; font-size:9.5px; color:var(--color-text-muted); font-weight:500; margin-top:1px; }
   .cell.per-base .result{ font-size:14.5px; text-align:center; }
@@ -268,14 +271,14 @@
   /* 算式（例如「208 ÷」）跟數字同一行靠左放，不另外佔用高度 */
   .calc-display .calc-expr{
     flex:0 0 auto;
-    font-family:var(--font-mono); font-size:12px;
+    font-family:var(--font-number); font-size:12px; font-weight:500;
     color:var(--color-text-muted);
     white-space:nowrap; overflow:hidden; max-width:38%;
   }
   /* 收緊行高讓數字幾乎撐滿整個框；字級再由 JS 依實際位數自動縮放，位數少就放到最大 */
   .calc-display .calc-value{
     flex:1 1 auto; min-width:0;
-    font-family:'JetBrains Mono', var(--font-mono); font-weight:700;
+    font-family:var(--font-number); font-weight:700;
     font-size:var(--calc-font-size, 76px); line-height:.78;
     letter-spacing:.5px;
     color:var(--color-text);
@@ -300,7 +303,7 @@
     border-radius:18px;
     background:var(--color-accent-soft);
     color:var(--color-text);
-    font-family:'JetBrains Mono', var(--font-mono);
+    font-family:var(--font-number);
     font-size:clamp(22px, 6vw, 30px); font-weight:700;
     display:flex; align-items:center; justify-content:center;
     cursor:pointer;
@@ -436,11 +439,17 @@
     let prevValue = null;
     let operator = null;
     let waitingForNewInput = false;
+    let displayIsResult = false; // display 是計算結果（可依寬度調整小數位數），而非使用者逐鍵輸入的數字
 
     function formatNumber(n){
       if(!isFinite(n)) return 'ERR';
-      const rounded = parseFloat(n.toPrecision(10));
-      return rounded.toString();
+      return parseFloat(n.toPrecision(10)).toString();
+    }
+
+    // 只捨去小數位、絕不動整數部分（1234.5678 最多變成 1235，不會變成 1230）
+    function formatWithDecimals(n, decimals){
+      if(!isFinite(n)) return 'ERR';
+      return parseFloat(n.toFixed(decimals)).toString();
     }
 
     function compute(a, b, op){
@@ -451,12 +460,29 @@
       return b;
     }
 
-    // 讓數字盡量用最大字級顯示，只有位數多到一行放不下時才逐步縮小
-    const FONT_MAX = 76, FONT_MIN = 24;
+    // 數字一律先用最大字級；放不下時「先減少小數位數」而不是縮字，
+    // 讓常見的計算結果都能維持大而好讀的字級（真的還是太長才退而縮小字級）
+    const FONT_MAX = 69, FONT_MIN = 24, DECIMALS_MAX = 8;
+    function overflows(){ return valueEl.scrollWidth > valueEl.clientWidth + 0.5; }
+
     function fitValueText(){
+      valueEl.style.setProperty('--calc-font-size', FONT_MAX + 'px');
+
+      // 只有「算出來的結果」可以減少位數；使用者自己按進去的數字要原樣保留
+      if(displayIsResult && display !== 'ERR'){
+        const n = parseFloat(display);
+        if(isFinite(n)){
+          for(let d = DECIMALS_MAX; d >= 0; d--){
+            const text = formatWithDecimals(n, d);
+            valueEl.textContent = text;
+            display = text;
+            if(!overflows()) break;
+          }
+        }
+      }
+
       let size = FONT_MAX;
-      valueEl.style.setProperty('--calc-font-size', size + 'px');
-      while(valueEl.scrollWidth > valueEl.clientWidth + 0.5 && size > FONT_MIN){
+      while(overflows() && size > FONT_MIN){
         size -= 2;
         valueEl.style.setProperty('--calc-font-size', size + 'px');
       }
@@ -475,19 +501,21 @@
     window.addEventListener('resize', fitValueText);
 
     function reset(){
-      display = '0'; prevValue = null; operator = null; waitingForNewInput = false;
+      display = '0'; prevValue = null; operator = null; waitingForNewInput = false; displayIsResult = false;
       render();
     }
 
     function inputDigit(d){
       if(display === 'ERR' || waitingForNewInput){ display = d; waitingForNewInput = false; }
       else{ display = (display === '0') ? d : display + d; }
+      displayIsResult = false;
       render();
     }
 
     function inputDecimal(){
-      if(display === 'ERR' || waitingForNewInput){ display = '0.'; waitingForNewInput = false; return render(); }
+      if(display === 'ERR' || waitingForNewInput){ display = '0.'; waitingForNewInput = false; displayIsResult = false; return render(); }
       if(!display.includes('.')) display += '.';
+      displayIsResult = false;
       render();
     }
 
@@ -496,12 +524,14 @@
       waitingForNewInput = false;
       display = display.length > 1 ? display.slice(0, -1) : '0';
       if(display === '-') display = '0';
+      displayIsResult = false;
       render();
     }
 
     function inputPercent(){
       if(display === 'ERR') return;
       display = formatNumber(parseFloat(display) / 100);
+      displayIsResult = true;
       render();
     }
 
@@ -511,6 +541,7 @@
       if(prevValue !== null && operator && !waitingForNewInput){
         prevValue = compute(prevValue, current, operator);
         display = formatNumber(prevValue);
+        displayIsResult = true;
       } else {
         prevValue = current;
       }
@@ -523,7 +554,7 @@
       if(display === 'ERR' || operator === null || prevValue === null) return;
       const result = compute(prevValue, parseFloat(display), operator);
       display = formatNumber(result);
-      prevValue = null; operator = null; waitingForNewInput = true;
+      prevValue = null; operator = null; waitingForNewInput = true; displayIsResult = true;
       render();
     }
 
