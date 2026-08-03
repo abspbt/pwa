@@ -532,16 +532,6 @@ if('serviceWorker' in navigator){
         if(document.visibilityState === 'visible') reg.update();
       });
 
-      reg.addEventListener('updatefound', () => {
-        const installing = reg.installing;
-        if(!installing) return;
-        installing.addEventListener('statechange', () => {
-          if(installing.state === 'installed' && navigator.serviceWorker.controller){
-            // 新版本已安裝完成，新版 sw.js 內部會直接 skipWaiting + clients.claim，
-            // 這裡等 controllerchange 觸發後統一重新整理即可。
-          }
-        });
-      });
     }).catch(() => { /* 離線或不支援時安靜失敗，不影響一般使用 */ });
 
     // 新的 Service Worker 一旦接管頁面，代表已經是新版本 → 自動重新整理
