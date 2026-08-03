@@ -35,6 +35,8 @@
 
 忘記改版本號是最容易踩的坑：程式碼即使改了，使用者端仍會被舊的 Service Worker 快取卡住看到舊版。
 
+**每次修改完 `pricely`（或其他有版本號機制的工具）的功能／畫面後，在完成前主動詢問使用者要不要一併更新版本號**，確認要更新的話再一起改 `CACHE_VERSION`（與 `app-version`）並提交，讓已安裝的使用者能強制更新到最新版。
+
 ## 圖示（icon）處理方式
 
 各工具的 `manifest.json` 會宣告 `icon-192.png` / `icon-512.png`，但這些圖示**不會**以獨立檔案存放在 repo 裡。使用者會另外自行製作圖示，交給 Claude 後直接轉成 base64 data URI，內嵌進 `manifest.json` 的 `icons[].src` 與 `index.html` 的 `<link rel="icon">` / `<link rel="apple-touch-icon">`，不要另外新增 `.png` 檔案。
