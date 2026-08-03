@@ -7,15 +7,13 @@
   4. 之後任何人打開這個網頁或已安裝的 App，都會在背景抓到新的 sw.js，
      自動清掉舊快取、接管頁面，並強制重新整理一次，直接看到最新版本。
 */
-const CACHE_VERSION = '2026.08.03.7';
+const CACHE_VERSION = '2026.08.03.8';
 const CACHE_NAME = 'price-compare-' + CACHE_VERSION;
 
 const CORE_ASSETS = [
   './',
   './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  './manifest.json'
 ];
 
 // 安裝新版本 Service Worker：預先快取核心檔案，並立刻取代舊版（不用等分頁關閉）
