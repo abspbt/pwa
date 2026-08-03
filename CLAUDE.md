@@ -35,6 +35,10 @@
 
 忘記改版本號是最容易踩的坑：程式碼即使改了，使用者端仍會被舊的 Service Worker 快取卡住看到舊版。
 
+## 圖示（icon）處理方式
+
+各工具的 `manifest.json` 會宣告 `icon-192.png` / `icon-512.png`，但這些圖示**不會**以獨立檔案存放在 repo 裡。使用者會另外自行製作圖示，交給 Claude 後直接轉成 base64 data URI，內嵌進 `manifest.json` 的 `icons[].src` 與 `index.html` 的 `<link rel="icon">` / `<link rel="apple-touch-icon">`，不要另外新增 `.png` 檔案。
+
 ## PR 與部署流程
 
 - 開發分支命名：`claude/<主題>-<隨機碼>`（由 session 指定）。
