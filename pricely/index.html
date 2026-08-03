@@ -6,14 +6,14 @@
 <meta name="theme-color" content="#8A6D4E">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="app-version" content="2026.08.03.4">
+<meta name="app-version" content="2026.08.03.5">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <title>單價比一比</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --color-bg:#F4F0E6;
@@ -267,25 +267,54 @@
     color:var(--color-text-muted);
     min-height:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
+  /* 七段顯示器造型的計算結果數字 */
   .calc-display .calc-value{
-    font-family:'JetBrains Mono', var(--font-mono); font-weight:700;
-    font-size:clamp(30px, 10vw, 46px); line-height:1.2;
-    letter-spacing:.5px;
-    color:var(--color-text);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    font-variant-numeric:tabular-nums;
+    display:flex; align-items:center; justify-content:flex-end;
+    width:100%; overflow-x:auto; overflow-y:hidden;
+    scrollbar-width:none;
   }
+  .calc-display .calc-value::-webkit-scrollbar{ display:none; }
+  .seg-digit{
+    position:relative; flex:0 0 auto;
+    width:clamp(14px, 4.2vw, 20px);
+    height:clamp(28px, 8.4vw, 40px);
+    margin:0 3px;
+  }
+  .seg-digit i{
+    position:absolute;
+    background:var(--color-border-strong);
+    opacity:.45;
+    border-radius:2px;
+    transition:background-color .1s ease, opacity .1s ease;
+  }
+  .seg-digit i.on{ background:var(--color-text); opacity:1; }
+  .seg-digit .seg-a{ top:0;    left:16%; right:16%; height:11%; }
+  .seg-digit .seg-d{ bottom:0; left:16%; right:16%; height:11%; }
+  .seg-digit .seg-g{ top:44.5%; left:16%; right:16%; height:11%; }
+  .seg-digit .seg-f{ top:6%;    left:0; width:15%; height:41%; }
+  .seg-digit .seg-b{ top:6%;    right:0; width:15%; height:41%; }
+  .seg-digit .seg-e{ bottom:6%; left:0; width:15%; height:41%; }
+  .seg-digit .seg-c{ bottom:6%; right:0; width:15%; height:41%; }
+  .seg-dot{
+    flex:0 0 auto; align-self:flex-end;
+    width:6px; height:6px; margin:0 2px 3px 0;
+    border-radius:50%; background:var(--color-text);
+  }
+
   .calc-grid{
     flex:1 1 auto; min-height:0;
     display:grid;
     grid-template-columns:repeat(4, 1fr);
     grid-template-rows:repeat(5, minmax(0,1fr));
+    align-items:center; justify-items:stretch;
     gap:12px;
     padding:6px 16px 18px;
   }
   .calc-btn{
+    aspect-ratio:1 / 1;
+    width:100%; height:auto; max-height:100%;
     border:none;
-    border-radius:20px;
+    border-radius:22%;
     background:var(--color-accent-soft);
     color:var(--color-text);
     font-family:var(--font-mono);
@@ -300,7 +329,7 @@
   .calc-btn.calc-func{ font-size:19px; color:var(--color-text-muted); }
   .calc-btn.calc-op{ font-size:29px; font-weight:700; }
   .calc-btn.calc-equals{ font-size:27px; }
-  .calc-btn.calc-zero{ grid-column:span 2; }
+  .calc-btn.calc-zero{ grid-column:span 2; aspect-ratio:2.15 / 1; }
 
   @media (max-width:380px){
     :root{ --label-w:74px; --add-w:36px; --row-h:56px; }
@@ -426,9 +455,26 @@
     let waitingForNewInput = false;
 
     function formatNumber(n){
-      if(!isFinite(n)) return '錯誤';
+      if(!isFinite(n)) return 'ERR';
       const rounded = parseFloat(n.toPrecision(10));
       return rounded.toString();
+    }
+
+    // 七段顯示器（傳統計算機 LCD）造型：把字元轉成 7 個線段的開關組合
+    const SEG_ON = {
+      '0':'abcdef', '1':'bc', '2':'abged', '3':'abgcd', '4':'fgbc',
+      '5':'afgcd',  '6':'afgecd', '7':'abc', '8':'abcdefg', '9':'abcdfg',
+      '-':'g', 'E':'afged'
+    };
+    function renderSevenSegment(str){
+      return [...str].map(ch => {
+        if(ch === '.') return '<span class="seg-dot"></span>';
+        const on = SEG_ON[ch] || '';
+        const bars = 'abcdefg'.split('').map(s =>
+          `<i class="seg-${s}${on.includes(s) ? ' on' : ''}"></i>`
+        ).join('');
+        return `<span class="seg-digit">${bars}</span>`;
+      }).join('');
     }
 
     function compute(a, b, op){
@@ -440,7 +486,7 @@
     }
 
     function render(){
-      valueEl.textContent = display;
+      valueEl.innerHTML = renderSevenSegment(display === 'ERR' ? '-E-' : display);
       exprEl.textContent = (prevValue !== null && operator)
         ? (formatNumber(prevValue) + ' ' + OP_SYMBOL[operator])
         : ' ';
@@ -452,19 +498,19 @@
     }
 
     function inputDigit(d){
-      if(display === '錯誤' || waitingForNewInput){ display = d; waitingForNewInput = false; }
+      if(display === 'ERR' || waitingForNewInput){ display = d; waitingForNewInput = false; }
       else{ display = (display === '0') ? d : display + d; }
       render();
     }
 
     function inputDecimal(){
-      if(display === '錯誤' || waitingForNewInput){ display = '0.'; waitingForNewInput = false; return render(); }
+      if(display === 'ERR' || waitingForNewInput){ display = '0.'; waitingForNewInput = false; return render(); }
       if(!display.includes('.')) display += '.';
       render();
     }
 
     function inputBackspace(){
-      if(display === '錯誤'){ reset(); return; }
+      if(display === 'ERR'){ reset(); return; }
       waitingForNewInput = false;
       display = display.length > 1 ? display.slice(0, -1) : '0';
       if(display === '-') display = '0';
@@ -472,13 +518,13 @@
     }
 
     function inputPercent(){
-      if(display === '錯誤') return;
+      if(display === 'ERR') return;
       display = formatNumber(parseFloat(display) / 100);
       render();
     }
 
     function inputOperator(op){
-      if(display === '錯誤') return;
+      if(display === 'ERR') return;
       const current = parseFloat(display);
       if(prevValue !== null && operator && !waitingForNewInput){
         prevValue = compute(prevValue, current, operator);
@@ -492,7 +538,7 @@
     }
 
     function inputEquals(){
-      if(display === '錯誤' || operator === null || prevValue === null) return;
+      if(display === 'ERR' || operator === null || prevValue === null) return;
       const result = compute(prevValue, parseFloat(display), operator);
       display = formatNumber(result);
       prevValue = null; operator = null; waitingForNewInput = true;
