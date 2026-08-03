@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#2F7A63">
+<meta name="theme-color" content="#8A6D4E">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="app-version" content="2026.08.03.1">
@@ -16,16 +16,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --color-bg:#FAF9F5;
+    --color-bg:#F4F0E6;
     --color-surface:#FFFFFF;
-    --color-border:#E4E1D6;
-    --color-border-strong:#D3CFC0;
-    --color-text:#22201B;
-    --color-text-muted:#8B8676;
-    --color-accent:#2F7A63;
-    --color-accent-soft:#E6F2ED;
-    --color-danger:#C24B3F;
-    --color-danger-soft:#FBEAE7;
+    --color-border:#E3DDCC;
+    --color-border-strong:#CFC6B0;
+    --color-text:#33302A;
+    --color-text-muted:#948A78;
+    --color-accent:#8A6D4E;
+    --color-accent-soft:#EFE4D3;
+    --color-danger:#A85338;
+    --color-danger-soft:#F4E6DE;
     --font-display:'Space Grotesk', sans-serif;
     --font-body:'Inter', sans-serif;
     --font-mono:'IBM Plex Mono', monospace;
@@ -83,7 +83,7 @@
   }
   .cat-card:hover{
     border-color:var(--color-accent);
-    box-shadow:0 6px 18px -8px rgba(47,122,99,.35);
+    box-shadow:0 6px 18px -8px rgba(138,109,78,.35);
     transform:translateY(-2px);
   }
   .cat-card:active{ transform:translateY(0) scale(.98); }
@@ -131,7 +131,7 @@
     font-family:var(--font-mono); white-space:nowrap;
   }
 
-  .board{ flex:1 1 auto; display:flex; min-height:0; overflow:hidden; }
+  .board{ flex:0 0 auto; display:flex; min-height:0; overflow:hidden; }
 
   .labels{
     flex:0 0 var(--label-w); width:var(--label-w);
@@ -162,8 +162,8 @@
   .scroll-area::-webkit-scrollbar-track{ background:transparent; }
 
   .fade{ position:absolute; top:0; bottom:0; width:18px; pointer-events:none; z-index:1; }
-  .fade.left{ left:0; background:linear-gradient(to right, rgba(250,249,245,.95), rgba(250,249,245,0)); }
-  .fade.right{ right:0; background:linear-gradient(to left, rgba(250,249,245,.95), rgba(250,249,245,0)); }
+  .fade.left{ left:0; background:linear-gradient(to right, rgba(244,240,230,.95), rgba(244,240,230,0)); }
+  .fade.right{ right:0; background:linear-gradient(to left, rgba(244,240,230,.95), rgba(244,240,230,0)); }
 
   .empty-hint{
     display:flex; align-items:center; justify-content:center;
@@ -219,7 +219,7 @@
     outline:none; border-color:var(--color-accent);
     box-shadow:0 0 0 3px var(--color-accent-soft);
   }
-  .col input::placeholder{ color:#C7C2B2; font-weight:500; }
+  .col input::placeholder{ color:#C9BFA9; font-weight:500; }
 
   .result{ font-family:var(--font-mono); font-size:14px; font-weight:600; color:var(--color-text-muted); }
   .result.filled{ color:var(--color-text); }
@@ -243,6 +243,66 @@
   }
   .add-btn:hover{ border-color:var(--color-accent); background:var(--color-accent-soft); }
   .add-btn:active{ transform:scale(.92); }
+
+  /* ================= CALCULATOR ================= */
+  .calc-wrap{
+    flex:1 1 auto; min-height:0;
+    display:flex; flex-direction:column;
+    border-top:1px solid var(--color-border);
+    background:var(--color-bg);
+  }
+  .calc-display{
+    flex:0 0 auto;
+    padding:14px 20px 8px;
+    text-align:right;
+  }
+  .calc-display .calc-expr{
+    font-family:var(--font-mono); font-size:12.5px;
+    color:var(--color-text-muted);
+    min-height:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .calc-display .calc-value{
+    font-family:var(--font-mono); font-weight:600;
+    font-size:clamp(26px, 8vw, 38px); line-height:1.2;
+    color:var(--color-text);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    font-variant-numeric:tabular-nums;
+  }
+  .calc-grid{
+    flex:1 1 auto; min-height:0;
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    grid-template-rows:repeat(5, minmax(0,1fr));
+    gap:8px;
+    padding:6px 12px 14px;
+  }
+  .calc-btn{
+    border:1px solid var(--color-border);
+    border-radius:14px;
+    background:var(--color-surface);
+    color:var(--color-text);
+    font-family:var(--font-mono);
+    font-size:19px; font-weight:600;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    touch-action:manipulation;
+    transition:transform .08s ease, background .15s ease;
+  }
+  .calc-btn:active{ transform:scale(.93); }
+  .calc-btn.calc-func{
+    background:transparent; color:var(--color-text-muted);
+    border-color:var(--color-border-strong);
+  }
+  .calc-btn.calc-op{
+    background:var(--color-accent-soft); color:var(--color-accent);
+    font-size:22px; font-weight:700;
+  }
+  .calc-btn.calc-equals{
+    background:var(--color-accent); color:#FFFFFF;
+    border-color:var(--color-accent);
+    font-size:20px;
+  }
+  .calc-btn.calc-zero{ grid-column:span 2; }
 
   @media (max-width:380px){
     :root{ --label-w:74px; --add-w:36px; --row-h:56px; }
@@ -333,6 +393,133 @@
     });
   }
 
+  // 通用四則運算計算機：每個類型（board）各自掛一份、狀態互不共用
+  function buildCalculator(mountEl){
+    const KEYS = [
+      { label:'AC', type:'ac',   cls:'calc-func' },
+      { label:'+/-', type:'sign', cls:'calc-func' },
+      { label:'%', type:'percent', cls:'calc-func' },
+      { label:'÷', type:'op', op:'/', cls:'calc-op' },
+      { label:'7', type:'digit' }, { label:'8', type:'digit' }, { label:'9', type:'digit' },
+      { label:'×', type:'op', op:'*', cls:'calc-op' },
+      { label:'4', type:'digit' }, { label:'5', type:'digit' }, { label:'6', type:'digit' },
+      { label:'−', type:'op', op:'-', cls:'calc-op' },
+      { label:'1', type:'digit' }, { label:'2', type:'digit' }, { label:'3', type:'digit' },
+      { label:'+', type:'op', op:'+', cls:'calc-op' },
+      { label:'0', type:'digit', cls:'calc-zero' }, { label:'.', type:'decimal' },
+      { label:'=', type:'equals', cls:'calc-equals' }
+    ];
+    const OP_SYMBOL = { '+':'+', '-':'−', '*':'×', '/':'÷' };
+
+    mountEl.innerHTML = `
+      <div class="calc-display">
+        <div class="calc-expr" data-role="calcExpr">&nbsp;</div>
+        <div class="calc-value" data-role="calcValue">0</div>
+      </div>
+      <div class="calc-grid" data-role="calcGrid"></div>
+    `;
+    const exprEl = mountEl.querySelector('[data-role="calcExpr"]');
+    const valueEl = mountEl.querySelector('[data-role="calcValue"]');
+    const gridEl = mountEl.querySelector('[data-role="calcGrid"]');
+
+    let display = '0';
+    let prevValue = null;
+    let operator = null;
+    let waitingForNewInput = false;
+
+    function formatNumber(n){
+      if(!isFinite(n)) return '錯誤';
+      const rounded = parseFloat(n.toPrecision(10));
+      return rounded.toString();
+    }
+
+    function compute(a, b, op){
+      if(op === '+') return a + b;
+      if(op === '-') return a - b;
+      if(op === '*') return a * b;
+      if(op === '/') return b === 0 ? NaN : a / b;
+      return b;
+    }
+
+    function render(){
+      valueEl.textContent = display;
+      exprEl.textContent = (prevValue !== null && operator)
+        ? (formatNumber(prevValue) + ' ' + OP_SYMBOL[operator])
+        : ' ';
+    }
+
+    function reset(){
+      display = '0'; prevValue = null; operator = null; waitingForNewInput = false;
+      render();
+    }
+
+    function inputDigit(d){
+      if(display === '錯誤' || waitingForNewInput){ display = d; waitingForNewInput = false; }
+      else{ display = (display === '0') ? d : display + d; }
+      render();
+    }
+
+    function inputDecimal(){
+      if(display === '錯誤' || waitingForNewInput){ display = '0.'; waitingForNewInput = false; return render(); }
+      if(!display.includes('.')) display += '.';
+      render();
+    }
+
+    function inputSign(){
+      if(display === '錯誤') return;
+      if(display.startsWith('-')) display = display.slice(1);
+      else if(display !== '0') display = '-' + display;
+      render();
+    }
+
+    function inputPercent(){
+      if(display === '錯誤') return;
+      display = formatNumber(parseFloat(display) / 100);
+      render();
+    }
+
+    function inputOperator(op){
+      if(display === '錯誤') return;
+      const current = parseFloat(display);
+      if(prevValue !== null && operator && !waitingForNewInput){
+        prevValue = compute(prevValue, current, operator);
+        display = formatNumber(prevValue);
+      } else {
+        prevValue = current;
+      }
+      operator = op;
+      waitingForNewInput = true;
+      render();
+    }
+
+    function inputEquals(){
+      if(display === '錯誤' || operator === null || prevValue === null) return;
+      const result = compute(prevValue, parseFloat(display), operator);
+      display = formatNumber(result);
+      prevValue = null; operator = null; waitingForNewInput = true;
+      render();
+    }
+
+    KEYS.forEach(key => {
+      const btn = document.createElement('button');
+      btn.className = 'calc-btn' + (key.cls ? ' ' + key.cls : '');
+      btn.type = 'button';
+      btn.textContent = key.label;
+      btn.addEventListener('click', () => {
+        if(key.type === 'digit') inputDigit(key.label);
+        else if(key.type === 'decimal') inputDecimal();
+        else if(key.type === 'ac') reset();
+        else if(key.type === 'sign') inputSign();
+        else if(key.type === 'percent') inputPercent();
+        else if(key.type === 'op') inputOperator(key.op);
+        else if(key.type === 'equals') inputEquals();
+      });
+      gridEl.appendChild(btn);
+    });
+
+    render();
+  }
+
   function buildBoard(cat){
     const view = document.createElement('div');
     view.className = 'view';
@@ -360,8 +547,11 @@
         </div>
         <div class="add-col"><button class="add-btn" aria-label="新增品項">+</button></div>
       </div>
+      <div class="calc-wrap" data-role="calcWrap"></div>
     `;
     boardsHost.appendChild(view);
+
+    buildCalculator(view.querySelector('[data-role="calcWrap"]'));
 
     const scrollArea = view.querySelector('[data-role="scrollArea"]');
     const addBtn = view.querySelector('.add-btn');
