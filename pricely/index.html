@@ -279,7 +279,7 @@
   .calc-display .calc-value{
     flex:1 1 auto; min-width:0;
     font-family:var(--font-number); font-weight:700;
-    font-size:var(--calc-font-size, 76px); line-height:.78;
+    font-size:var(--calc-font-size, 59px); line-height:.78;
     letter-spacing:.5px;
     color:var(--color-text);
     text-align:right;
@@ -462,7 +462,7 @@
 
     // 數字一律先用最大字級；放不下時「先減少小數位數」而不是縮字，
     // 讓常見的計算結果都能維持大而好讀的字級（真的還是太長才退而縮小字級）
-    const FONT_MAX = 69, FONT_MIN = 24, DECIMALS_MAX = 8;
+    const FONT_MAX = 59, FONT_MIN = 24, DECIMALS_MAX = 8;
     function overflows(){ return valueEl.scrollWidth > valueEl.clientWidth + 0.5; }
 
     function fitValueText(){
