@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#2F7A63">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="app-version" content="2026.08.03.1">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>單價比一比</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --color-bg:#FAF9F5;
+    --color-surface:#FFFFFF;
+    --color-border:#E4E1D6;
+    --color-border-strong:#D3CFC0;
+    --color-text:#22201B;
+    --color-text-muted:#8B8676;
+    --color-accent:#2F7A63;
+    --color-accent-soft:#E6F2ED;
+    --color-danger:#C24B3F;
+    --color-danger-soft:#FBEAE7;
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+    --row-h:60px;
+    --head-h:44px;
+    --label-w:84px;
+    --add-w:40px;
+    --col-w:calc((100vw - var(--label-w) - var(--add-w)) / 3.5);
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; height:100%; overflow:hidden;
+    background:var(--color-bg); color:var(--color-text);
+    font-family:var(--font-body);
+    -webkit-tap-highlight-color:transparent;
+  }
+  input, button{ font-size:16px; }
+
+  .app{ height:100vh; height:100dvh; display:flex; flex-direction:column; }
+  .view{ height:100%; display:none; flex-direction:column; min-height:0; }
+  .view.active{ display:flex; }
+
+  /* ================= HOME VIEW ================= */
+  #home{
+    align-items:center; justify-content:center;
+    padding:24px; text-align:center; gap:0;
+  }
+  #home .home-inner{ width:100%; max-width:420px; }
+  #home .eyebrow{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--color-accent);
+    background:var(--color-accent-soft); display:inline-block;
+    padding:3px 10px; border-radius:20px; margin-bottom:14px;
+  }
+  #home h1{
+    font-family:var(--font-display); font-weight:700; font-size:26px;
+    margin:0 0 6px;
+  }
+  #home p.desc{
+    font-size:13.5px; color:var(--color-text-muted); margin:0 0 28px;
+    line-height:1.5;
+  }
+  .cat-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:14px;
+  }
+  .cat-card{
+    background:var(--color-surface);
+    border:1.5px solid var(--color-border);
+    border-radius:16px;
+    padding:22px 14px 18px;
+    cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    transition:transform .12s ease, border-color .15s ease, box-shadow .15s ease;
+    font-family:var(--font-body);
+  }
+  .cat-card:hover{
+    border-color:var(--color-accent);
+    box-shadow:0 6px 18px -8px rgba(47,122,99,.35);
+    transform:translateY(-2px);
+  }
+  .cat-card:active{ transform:translateY(0) scale(.98); }
+  .cat-icon{
+    width:52px; height:52px; border-radius:50%;
+    background:var(--color-accent-soft);
+    display:flex; align-items:center; justify-content:center;
+    font-size:26px;
+  }
+  .cat-name{ font-weight:600; font-size:15px; }
+  .cat-fields{
+    font-family:var(--font-mono); font-size:10px; color:var(--color-text-muted);
+    line-height:1.4;
+  }
+  .version-tag{
+    margin-top:26px; font-family:var(--font-mono); font-size:10.5px;
+    color:var(--color-text-muted); opacity:.7;
+  }
+
+  /* ================= BOARD VIEW (shared) ================= */
+  .topbar{
+    flex:0 0 auto;
+    display:flex; align-items:center; gap:8px;
+    padding:12px 14px 10px;
+    border-bottom:1px solid var(--color-border);
+  }
+  .back-btn{
+    width:32px; height:32px; border-radius:8px; border:1px solid var(--color-border-strong);
+    background:var(--color-surface); color:var(--color-text);
+    font-size:16px; cursor:pointer; flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .back-btn:hover{ background:var(--color-accent-soft); border-color:var(--color-accent); }
+  .topbar h1{
+    font-family:var(--font-display); font-weight:700;
+    font-size:17px; letter-spacing:.2px; margin:0;
+  }
+  .topbar .tag{
+    font-family:var(--font-mono); font-size:11px;
+    color:var(--color-accent); background:var(--color-accent-soft);
+    padding:2px 7px; border-radius:20px; font-weight:600; white-space:nowrap;
+  }
+  .topbar .sub{
+    margin-left:auto; font-size:11.5px; color:var(--color-text-muted);
+    font-family:var(--font-mono); white-space:nowrap;
+  }
+
+  .board{ flex:1 1 auto; display:flex; min-height:0; overflow:hidden; }
+
+  .labels{
+    flex:0 0 var(--label-w); width:var(--label-w);
+    border-right:1px solid var(--color-border-strong);
+    background:var(--color-surface);
+    display:grid; grid-template-rows:var(--head-h) repeat(5, var(--row-h));
+    position:relative; z-index:2;
+    box-shadow:2px 0 6px -4px rgba(0,0,0,.15);
+  }
+  .labels .cell{
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    padding:4px 6px; border-bottom:1px solid var(--color-border);
+  }
+  .labels .cell.head{
+    color:var(--color-text-muted); font-family:var(--font-mono);
+    font-size:11px; letter-spacing:.02em;
+  }
+  .labels .cell .label-main{
+    font-size:15px; font-weight:700; line-height:1.2;
+    white-space:nowrap; overflow:hidden; max-width:100%;
+  }
+
+  .scroll-wrap{ flex:1 1 auto; min-width:0; position:relative; }
+  .scroll-area{ height:100%; display:flex; overflow-x:auto; overflow-y:hidden; scroll-behavior:smooth; }
+  .scroll-area::-webkit-scrollbar{ height:6px; }
+  .scroll-area::-webkit-scrollbar-thumb{ background:var(--color-border-strong); border-radius:4px; }
+  .scroll-area::-webkit-scrollbar-track{ background:transparent; }
+
+  .fade{ position:absolute; top:0; bottom:0; width:18px; pointer-events:none; z-index:1; }
+  .fade.left{ left:0; background:linear-gradient(to right, rgba(250,249,245,.95), rgba(250,249,245,0)); }
+  .fade.right{ right:0; background:linear-gradient(to left, rgba(250,249,245,.95), rgba(250,249,245,0)); }
+
+  .empty-hint{
+    display:flex; align-items:center; justify-content:center;
+    flex:1; color:var(--color-text-muted); font-size:13px; padding:0 16px;
+  }
+
+  .col{
+    flex:0 0 var(--col-w); width:var(--col-w);
+    display:grid; grid-template-rows:var(--head-h) repeat(5, var(--row-h));
+    border-right:1px solid var(--color-border);
+    background:var(--color-surface);
+    position:relative;
+    transition:box-shadow .25s ease, border-color .25s ease;
+  }
+  .col.best{ box-shadow:inset 0 0 0 2px var(--color-accent); z-index:1; }
+
+  .col .head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 4px 0 6px; border-bottom:1px solid var(--color-border);
+  }
+  .col .head .idx{
+    font-family:var(--font-mono); font-size:11px; color:var(--color-text-muted);
+    display:flex; align-items:center; gap:5px;
+  }
+  .col.best .head .idx{ color:var(--color-accent); font-weight:600; }
+  .badge-best{
+    font-size:12px; line-height:1; color:var(--color-accent);
+  }
+  .del-btn{
+    width:20px; height:20px; border-radius:6px; border:none;
+    background:transparent; color:var(--color-text-muted);
+    font-size:13px; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s, color .15s;
+  }
+  .del-btn:hover{ background:var(--color-danger-soft); color:var(--color-danger); }
+
+  .col .cell{
+    display:flex; align-items:center; justify-content:center;
+    padding:6px 6px; border-bottom:1px solid var(--color-border);
+  }
+  .col input{
+    width:100%; height:36px;
+    border:1px solid var(--color-border-strong);
+    border-radius:8px; background:var(--color-bg);
+    font-family:var(--font-mono); font-size:16px; font-weight:600;
+    color:var(--color-text); text-align:center; padding:0 4px;
+    -moz-appearance:textfield; touch-action:manipulation;
+  }
+  .col input::-webkit-outer-spin-button,
+  .col input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .col input:focus{
+    outline:none; border-color:var(--color-accent);
+    box-shadow:0 0 0 3px var(--color-accent-soft);
+  }
+  .col input::placeholder{ color:#C7C2B2; font-weight:500; }
+
+  .result{ font-family:var(--font-mono); font-size:14px; font-weight:600; color:var(--color-text-muted); }
+  .result.filled{ color:var(--color-text); }
+  .result .unit{ display:block; font-size:9.5px; color:var(--color-text-muted); font-weight:500; margin-top:1px; }
+  .cell.per-base .result{ font-size:14.5px; text-align:center; }
+  .col.best .cell.per-base .result{ color:var(--color-accent); }
+  .col.best .cell.per-base{ background:var(--color-accent-soft); }
+
+  .add-col{
+    flex:0 0 var(--add-w); width:var(--add-w);
+    display:flex; align-items:center; justify-content:center;
+    background:var(--color-bg); border-left:1px solid var(--color-border);
+  }
+  .add-btn{
+    width:32px; height:32px; border-radius:9px;
+    border:1.5px dashed var(--color-border-strong);
+    background:var(--color-surface); color:var(--color-accent);
+    font-size:18px; font-weight:600; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .12s ease, border-color .15s, background .15s;
+  }
+  .add-btn:hover{ border-color:var(--color-accent); background:var(--color-accent-soft); }
+  .add-btn:active{ transform:scale(.92); }
+
+  @media (max-width:380px){
+    :root{ --label-w:74px; --add-w:36px; --row-h:56px; }
+    .col input{ padding:0 2px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ HOME ============ -->
+  <div class="view active" id="home">
+    <div class="home-inner">
+      <span class="eyebrow">單價比一比</span>
+      <h1>要比較哪一種商品？</h1>
+      <p class="desc">選好類型後，直接輸入賣場標示的總價與規格，馬上看出每單位最划算的選擇。</p>
+      <div class="cat-grid" id="catGrid"></div>
+      <div class="version-tag" id="versionTag"></div>
+    </div>
+  </div>
+
+  <!-- board views are injected here by JS, one per category -->
+  <div id="boards"></div>
+
+</div>
+
+<script>
+(function(){
+
+  // ---- 類型設定：以後要新增品項比價，只要在這裡加一組設定即可 ----
+  const CATEGORIES = [
+    {
+      key:'water',
+      name:'瓶裝飲品',
+      icon:'💧',
+      unitTag:'NT$ / ml',
+      fieldsHint:'總價 · 容量 · 瓶數',
+      fields:[
+        { key:'total', label:'總價',   sub:'NT$',       placeholder:'199', step:'0.01', mode:'decimal' },
+        { key:'base',  label:'容量',   sub:'每瓶 ml',    placeholder:'600', step:'1',    mode:'decimal' },
+        { key:'count', label:'瓶數',   sub:'共幾瓶',     placeholder:'24',  step:'1',    mode:'numeric' }
+      ],
+      out1:{ label:'單瓶價格',  sub:'自動計算' },
+      out2:{ label:'每 ml 價格', sub:'自動計算', unit:'/ml' }
+    },
+    {
+      key:'tissue',
+      name:'衛生紙',
+      icon:'🧻',
+      unitTag:'NT$ / 抽',
+      fieldsHint:'總價 · 抽數 · 包數',
+      fields:[
+        { key:'total', label:'總價', sub:'NT$',      placeholder:'299', step:'0.01', mode:'decimal' },
+        { key:'base',  label:'抽數', sub:'每包抽數',  placeholder:'100', step:'1',    mode:'numeric' },
+        { key:'count', label:'包數', sub:'共幾包',    placeholder:'6',   step:'1',    mode:'numeric' }
+      ],
+      out1:{ label:'單包價格', sub:'自動計算' },
+      out2:{ label:'每抽價格', sub:'自動計算', unit:'/抽' }
+    }
+  ];
+
+  const homeView = document.getElementById('home');
+  const catGrid = document.getElementById('catGrid');
+  const boardsHost = document.getElementById('boards');
+  const boardState = {}; // key -> { items:[], seq:0, scrollArea, addBtn... }
+
+  function fmtMoney(n){ return isFinite(n) ? n.toFixed(2) : '--'; }
+  function fmtPerBase(n){
+    if(!isFinite(n)) return '--';
+    return n >= 1 ? n.toFixed(3) : n.toFixed(4);
+  }
+
+  function showView(el){
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // 讓說明欄的文字在固定欄寬下，自動縮小字級到剛好一行顯示完（不換行）
+  function fitLabelTexts(view){
+    const els = view.querySelectorAll('.labels .label-main');
+    els.forEach(el => {
+      let size = 15;
+      el.style.fontSize = size + 'px';
+      while(el.scrollWidth > el.clientWidth + 0.5 && size > 9){
+        size -= 0.5;
+        el.style.fontSize = size + 'px';
+      }
+    });
+  }
+
+  function buildBoard(cat){
+    const view = document.createElement('div');
+    view.className = 'view';
+    view.id = 'board-' + cat.key;
+    view.innerHTML = `
+      <div class="topbar">
+        <button class="back-btn" aria-label="返回選單">←</button>
+        <h1>${cat.name}比一比</h1>
+        <span class="tag">${cat.unitTag}</span>
+        <span class="sub" data-role="count">1 個品項</span>
+      </div>
+      <div class="board">
+        <div class="labels">
+          <div class="cell head">品項</div>
+          <div class="cell"><div class="label-main">${cat.fields[0].label}</div></div>
+          <div class="cell"><div class="label-main">${cat.fields[1].label}</div></div>
+          <div class="cell"><div class="label-main">${cat.fields[2].label}</div></div>
+          <div class="cell"><div class="label-main">${cat.out1.label}</div></div>
+          <div class="cell"><div class="label-main">${cat.out2.label}</div></div>
+        </div>
+        <div class="scroll-wrap">
+          <div class="scroll-area" data-role="scrollArea"></div>
+          <div class="fade left" style="opacity:0"></div>
+          <div class="fade right" style="opacity:0"></div>
+        </div>
+        <div class="add-col"><button class="add-btn" aria-label="新增品項">+</button></div>
+      </div>
+    `;
+    boardsHost.appendChild(view);
+
+    const scrollArea = view.querySelector('[data-role="scrollArea"]');
+    const addBtn = view.querySelector('.add-btn');
+    const backBtn = view.querySelector('.back-btn');
+    const countInfo = view.querySelector('[data-role="count"]');
+    const fadeLeft = view.querySelector('.fade.left');
+    const fadeRight = view.querySelector('.fade.right');
+
+    const state = { items:[], seq:0 };
+    boardState[cat.key] = state;
+
+    function updateCountInfo(){ countInfo.textContent = state.items.length + ' 個品項'; }
+
+    function renderEmptyState(){
+      let hint = scrollArea.querySelector('.empty-hint');
+      if(state.items.length === 0){
+        if(!hint){
+          hint = document.createElement('div');
+          hint.className = 'empty-hint';
+          hint.textContent = '目前沒有品項，點右側「+」開始比價';
+          scrollArea.appendChild(hint);
+        }
+      } else if(hint){ hint.remove(); }
+    }
+
+    function recalcAll(){
+      const rows = [];
+      state.items.forEach(item => {
+        const el = item.el;
+        const total = parseFloat(el.querySelector('[data-field="total"]').value);
+        const base  = parseFloat(el.querySelector('[data-field="base"]').value);
+        const count = parseFloat(el.querySelector('[data-field="count"]').value);
+
+        const out1El = el.querySelector('[data-out="out1"]');
+        const out2El = el.querySelector('[data-out="out2"]');
+
+        let perUnit = NaN, perBase = NaN;
+        if(isFinite(total) && isFinite(count) && count > 0){ perUnit = total / count; }
+        if(isFinite(perUnit) && isFinite(base) && base > 0){ perBase = perUnit / base; }
+
+        out1El.textContent = isFinite(perUnit) ? ('$' + fmtMoney(perUnit)) : '--';
+        out1El.classList.toggle('filled', isFinite(perUnit));
+
+        out2El.innerHTML = isFinite(perBase) ? ('$' + fmtPerBase(perBase) + '<span class="unit">' + cat.out2.unit + '</span>') : '--';
+        out2El.classList.toggle('filled', isFinite(perBase));
+
+        // 用「顯示出來的精度」四捨五入後再比較，避免浮點數誤差把同價位誤判成不同價
+        const rounded = isFinite(perBase) ? Number(fmtPerBase(perBase)) : NaN;
+        rows.push({ id:item.id, el, perBase, rounded });
+      });
+
+      const validRounded = rows.map(r => r.rounded).filter(v => isFinite(v));
+      const minValue = validRounded.length ? Math.min(...validRounded) : null;
+
+      rows.forEach(r => {
+        const isBest = minValue !== null && r.rounded === minValue && validRounded.length > 1;
+        r.el.classList.toggle('best', !!isBest);
+        r.el.querySelector('.badge-best').style.display = isBest ? 'inline-block' : 'none';
+      });
+    }
+
+    function updateFades(){
+      const max = scrollArea.scrollWidth - scrollArea.clientWidth;
+      fadeLeft.style.opacity = scrollArea.scrollLeft > 4 ? '1' : '0';
+      fadeRight.style.opacity = (max - scrollArea.scrollLeft > 4) ? '1' : '0';
+    }
+
+    function createColumn(){
+      const id = ++state.seq;
+      const wrap = document.createElement('div');
+      wrap.className = 'col';
+      wrap.dataset.id = id;
+      wrap.innerHTML = `
+        <div class="head">
+          <span class="idx">#${id}<span class="badge-best" style="display:none" title="最划算">★</span></span>
+          <button class="del-btn" aria-label="刪除此品項">✕</button>
+        </div>
+        <div class="cell"><input type="number" inputmode="${cat.fields[0].mode}" min="0" step="${cat.fields[0].step}" placeholder="${cat.fields[0].placeholder}" data-field="total"></div>
+        <div class="cell"><input type="number" inputmode="${cat.fields[1].mode}" min="0" step="${cat.fields[1].step}" placeholder="${cat.fields[1].placeholder}" data-field="base"></div>
+        <div class="cell"><input type="number" inputmode="${cat.fields[2].mode}" min="1" step="${cat.fields[2].step}" placeholder="${cat.fields[2].placeholder}" data-field="count"></div>
+        <div class="cell"><span class="result" data-out="out1">--</span></div>
+        <div class="cell per-base"><span class="result" data-out="out2">--<span class="unit">${cat.out2.unit}</span></span></div>
+      `;
+      scrollArea.appendChild(wrap);
+
+      wrap.querySelectorAll('input').forEach(inp => inp.addEventListener('input', recalcAll));
+      wrap.querySelector('.del-btn').addEventListener('click', () => {
+        state.items = state.items.filter(it => it.id !== id);
+        wrap.remove();
+        updateCountInfo();
+        recalcAll();
+        renderEmptyState();
+        updateFades();
+      });
+
+      state.items.push({ id, el: wrap });
+      updateCountInfo();
+      renderEmptyState();
+      return wrap;
+    }
+
+    addBtn.addEventListener('click', () => {
+      const col = createColumn();
+      requestAnimationFrame(() => {
+        scrollArea.scrollLeft = scrollArea.scrollWidth;
+        updateFades();
+        const firstInput = col.querySelector('input');
+        if(firstInput) firstInput.focus();
+      });
+    });
+
+    backBtn.addEventListener('click', () => showView(homeView));
+    scrollArea.addEventListener('scroll', updateFades);
+    window.addEventListener('resize', updateFades);
+
+    // initial column
+    createColumn();
+    recalcAll();
+    updateFades();
+
+    return view;
+  }
+
+  const builtViews = {};
+
+  CATEGORIES.forEach(cat => {
+    const card = document.createElement('div');
+    card.className = 'cat-card';
+    card.innerHTML = `
+      <div class="cat-icon">${cat.icon}</div>
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-fields">${cat.fieldsHint}</div>
+    `;
+    card.addEventListener('click', () => {
+      if(!builtViews[cat.key]){
+        builtViews[cat.key] = buildBoard(cat);
+      }
+      showView(builtViews[cat.key]);
+      fitLabelTexts(builtViews[cat.key]);
+      if(document.fonts && document.fonts.ready){
+        document.fonts.ready.then(() => fitLabelTexts(builtViews[cat.key]));
+      }
+    });
+    catGrid.appendChild(card);
+  });
+
+  const versionTag = document.getElementById('versionTag');
+  if(versionTag){
+    const v = document.querySelector('meta[name="app-version"]');
+    versionTag.textContent = v ? ('版本 ' + v.content) : '';
+  }
+
+})();
+</script>
+
+<script>
+// ============ PWA 強制更新機制 ============
+// 每次開啟這個網頁／App，都會主動向伺服器確認是否有新版本；
+// 一旦偵測到新版本，會自動套用並重新整理，不需要使用者手動清除快取。
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      // 主動檢查一次是否有新版 sw.js（略過瀏覽器預設的節流延遲）
+      reg.update();
+
+      // 每次切回這個分頁，也再檢查一次
+      document.addEventListener('visibilitychange', () => {
+        if(document.visibilityState === 'visible') reg.update();
+      });
+
+      reg.addEventListener('updatefound', () => {
+        const installing = reg.installing;
+        if(!installing) return;
+        installing.addEventListener('statechange', () => {
+          if(installing.state === 'installed' && navigator.serviceWorker.controller){
+            // 新版本已安裝完成，新版 sw.js 內部會直接 skipWaiting + clients.claim，
+            // 這裡等 controllerchange 觸發後統一重新整理即可。
+          }
+        });
+      });
+    }).catch(() => { /* 離線或不支援時安靜失敗，不影響一般使用 */ });
+
+    // 新的 Service Worker 一旦接管頁面，代表已經是新版本 → 自動重新整理
+    let refreshed = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if(refreshed) return;
+      refreshed = true;
+      window.location.reload();
+    });
+  });
+}
+</script>
+</body>
+</html>
