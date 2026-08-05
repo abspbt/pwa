@@ -404,6 +404,22 @@
     </div>
   </div>
 
+  <!-- Update Available Toast (Service Worker 偵測到新版本時顯示，讓使用者自行選擇重新整理時機) -->
+  <div id="update-available-toast" class="hidden fixed left-4 right-4 bottom-4 z-[60] max-w-sm mx-auto">
+    <div class="bg-[#4A4A47] text-[#F5F1E8] rounded-xl shadow-xl px-4 py-3 flex items-center gap-3">
+      <i class="fa-solid fa-arrows-rotate text-lg shrink-0"></i>
+      <div class="flex-1 text-xs leading-snug">
+        有新版本可用，重新整理即可更新。
+      </div>
+      <button onclick="window.location.reload()" type="button" class="shrink-0 text-xs font-bold bg-[#F5F1E8] text-[#4A4A47] px-2.5 py-1.5 rounded-lg hover:opacity-85">
+        立即更新
+      </button>
+      <button onclick="dismissUpdateToast()" type="button" class="shrink-0 text-[#F5F1E8]/70 hover:text-[#F5F1E8] px-1">
+        ✕
+      </button>
+    </div>
+  </div>
+
   <script>
     /* Global Storage Key & Initial Preset Data */
     const STORAGE_KEY = 'pwa_barcode_wallet_v2';
@@ -1047,22 +1063,47 @@
       // Register Service Worker and auto-check for updates every time the app opens
       if ('serviceWorker' in navigator) {
         try {
+          // If this page load was already controlled by a Service Worker,
+          // any future controller change is a genuine update (new sw.js took
+          // over) — prompt the user instead of force-reloading, so an
+          // in-progress edit (e.g. typing a member code) isn't lost.
+          // If there was no controller yet, this is the very first install:
+          // nothing is rendered from cache yet, so it's safe to reload once
+          // silently to bring this tab under the Service Worker's control.
+          const hadController = !!navigator.serviceWorker.controller;
+          let hasReloaded = false;
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (hasReloaded) return;
+            hasReloaded = true;
+            if (hadController) {
+              showUpdateToast();
+            } else {
+              window.location.reload();
+            }
+          });
+
+          navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'SW_UPDATED' && hadController) {
+              showUpdateToast();
+            }
+          });
+
           navigator.serviceWorker.register('./sw.js').then((reg) => {
             reg.update(); // proactively check the server for a newer sw.js right now
           }).catch((err) => {
             console.log("Offline fallback ready (standard SW relative path checked)");
           });
-
-          // Reload once so the page picks up the new version immediately
-          let hasReloaded = false;
-          navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (hasReloaded) return;
-            hasReloaded = true;
-            window.location.reload();
-          });
         } catch (e) {}
       }
     };
+
+    function showUpdateToast() {
+      document.getElementById('update-available-toast').classList.remove('hidden');
+    }
+
+    function dismissUpdateToast() {
+      document.getElementById('update-available-toast').classList.add('hidden');
+    }
   </script>
 </body>
 </html>
