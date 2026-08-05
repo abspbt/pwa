@@ -7,7 +7,7 @@
   4. 之後任何人打開這個網頁或已安裝的 App，都會在背景抓到新的 sw.js，
      自動清掉舊快取、接管頁面，並強制重新整理一次，直接看到最新版本。
 */
-const CACHE_VERSION = '2026.08.04.3';
+const CACHE_VERSION = '2026.08.05.1';
 const CACHE_NAME = 'price-compare-' + CACHE_VERSION;
 
 const CORE_ASSETS = [
@@ -33,6 +33,14 @@ self.addEventListener('activate', (event) => {
       ))
       .then(() => self.clients.claim())
   );
+});
+
+// 回覆頁面的版本查詢：告訴它「目前實際生效」的是哪個 CACHE_VERSION，
+// 讓畫面上的版本文字可以跟自己內建的 app-version 比對，抓出兩者不同步的狀態。
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'GET_CACHE_VERSION' && event.ports[0]) {
+    event.ports[0].postMessage({ cacheVersion: CACHE_VERSION });
+  }
 });
 
 // 拿資料一律「先試著連網路拿最新的」，只有離線抓不到時才用快取當備援，
