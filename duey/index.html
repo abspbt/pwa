@@ -383,7 +383,8 @@
       flex-shrink: 0;
       background-color: var(--bg-color);
       border-top: 1px solid var(--divider);
-      padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+      /* 額外保留給 #version-footer 的空間，避免版本註記緊貼著上面的 .input-hint */
+      padding-bottom: calc(max(12px, env(safe-area-inset-bottom, 12px)) + 16px);
     }
     .input-row {
       display: flex;
@@ -533,17 +534,19 @@
     }
     #update-banner.show { transform: translateY(0); }
 
-    /* 版本註記：低調顯示於畫面最下方，只有跟 SW 實際生效版本不一致時才醒目標示 */
+    /* 版本註記：低調顯示於畫面最下方，只有跟 SW 實際生效版本不一致時才醒目標示。
+       靠右對齊＋更淡的透明度，跟上面置中的 .input-hint 做出視覺區隔，避免看起來像同一段文字。 */
     #version-footer {
       position: fixed;
       bottom: 2px;
       left: 0;
       right: 0;
+      padding: 0 14px;
       padding-bottom: env(safe-area-inset-bottom, 0px);
-      text-align: center;
-      font-size: 0.62rem;
+      text-align: right;
+      font-size: 0.6rem;
       color: var(--text-secondary, #9eb3c4);
-      opacity: .45;
+      opacity: .3;
       pointer-events: none;
       z-index: 1;
     }
@@ -732,7 +735,7 @@
    ║           D U E Y  v2.5               ║
    ╚═══════════════════════════════════════╝ */
 
-const APP_VERSION = '2026.08.05.1';
+const APP_VERSION = '2026.08.05.2';
 const STORAGE_KEY = 'duey_tasks_v2';
 const THEME_KEY   = 'duey_theme_v1';
 const WEEKDAYS    = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
