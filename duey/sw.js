@@ -7,7 +7,7 @@
   4. 之後任何人打開這個網頁或已安裝的 App，都會在背景抓到新的 sw.js，
      自動清掉舊快取、接管頁面，看到最新版本。
 */
-const CACHE_VERSION = '2026.08.05.1';
+const CACHE_VERSION = '2026.08.05.2';
 const CACHE_NAME = 'duey-' + CACHE_VERSION;
 
 const CORE_ASSETS = [
