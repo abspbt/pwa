@@ -532,6 +532,26 @@
       backdrop-filter: blur(12px);
     }
     #update-banner.show { transform: translateY(0); }
+
+    /* 版本註記：低調顯示於畫面最下方，只有跟 SW 實際生效版本不一致時才醒目標示 */
+    #version-footer {
+      position: fixed;
+      bottom: 2px;
+      left: 0;
+      right: 0;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      text-align: center;
+      font-size: 0.62rem;
+      color: var(--text-secondary, #9eb3c4);
+      opacity: .45;
+      pointer-events: none;
+      z-index: 1;
+    }
+    #version-footer.mismatch {
+      opacity: 1;
+      font-weight: 600;
+      color: #e0a030;
+    }
     #update-refresh-btn {
       background: var(--accent, #5b8fa8);
       color: #fff;
@@ -704,12 +724,15 @@
   <button id="update-refresh-btn">立即更新</button>
 </div>
 
+<!-- 版本註記 -->
+<div id="version-footer"></div>
+
 <script>
 /* ╔═══════════════════════════════════════╗
    ║           D U E Y  v2.5               ║
    ╚═══════════════════════════════════════╝ */
 
-const APP_VERSION = '2026.07.29-1';
+const APP_VERSION = '2026.08.05.1';
 const STORAGE_KEY = 'duey_tasks_v2';
 const THEME_KEY   = 'duey_theme_v1';
 const WEEKDAYS    = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
@@ -1242,6 +1265,46 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js');
   });
+  navigator.serviceWorker.addEventListener('controllerchange', renderVersionFooter);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') renderVersionFooter();
+  });
+}
+renderVersionFooter();
+
+// 向目前實際控制頁面的 Service Worker 詢問它生效中的快取版本，
+// 跟頁面自己內建的 APP_VERSION 比對；不問寫死的字串，問的是「現在真的在跑」的那個。
+// 這跟上面 checkForUpdate() 是兩件獨立的事：checkForUpdate 繞過 SW、直接重新
+// fetch index.html 比對「伺服器上」的版本；這裡問的是「SW 目前實際快取」的版本，
+// 用來抓 HTML 與 SW 快取不同步的狀態，兩者不會互相干擾。
+function queryActiveCacheVersion() {
+  return new Promise((resolve) => {
+    if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) {
+      resolve(null);
+      return;
+    }
+    const channel = new MessageChannel();
+    const timeout = setTimeout(() => resolve(null), 2000);
+    channel.port1.onmessage = (event) => {
+      clearTimeout(timeout);
+      resolve((event.data && event.data.cacheVersion) || null);
+    };
+    navigator.serviceWorker.controller.postMessage({ type: 'GET_CACHE_VERSION' }, [channel.port2]);
+  });
+}
+
+async function renderVersionFooter() {
+  const el = document.getElementById('version-footer');
+  if (!el) return;
+  const swVersion = await queryActiveCacheVersion();
+
+  if (!swVersion || swVersion === APP_VERSION) {
+    el.textContent = `版本 ${APP_VERSION}`;
+    el.classList.remove('mismatch');
+  } else {
+    el.textContent = `⚠ 版本不一致：頁面 ${APP_VERSION} ／ 快取 ${swVersion}`;
+    el.classList.add('mismatch');
+  }
 }
 </script>
 </body>
