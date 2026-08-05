@@ -420,7 +420,16 @@
     </div>
   </div>
 
+  <!-- Version Footer (低調顯示目前版本；只在頁面版本與 SW 快取版本不一致時明顯標示) -->
+  <div id="version-footer" class="fixed bottom-1 inset-x-0 text-center text-[9px] text-[#4A4A47]/35 pointer-events-none select-none z-10"></div>
+
   <script>
+    /* Build Version — must match sw.js's CACHE_NAME on every release. See
+       CLAUDE.md "版本更新機制" for the rule; the version footer at the
+       bottom of the page compares this against the Service Worker's
+       actual active cache name at runtime and flags any mismatch. */
+    const BUILD_VERSION = 'barcode-pwa-v4';
+
     /* Global Storage Key & Initial Preset Data */
     const STORAGE_KEY = 'pwa_barcode_wallet_v2';
 
@@ -1086,7 +1095,10 @@
             if (event.data && event.data.type === 'SW_UPDATED' && hadController) {
               showUpdateToast();
             }
+            renderVersionFooter();
           });
+
+          navigator.serviceWorker.addEventListener('controllerchange', renderVersionFooter);
 
           navigator.serviceWorker.register('./sw.js').then((reg) => {
             reg.update(); // proactively check the server for a newer sw.js right now
@@ -1095,6 +1107,8 @@
           });
         } catch (e) {}
       }
+
+      renderVersionFooter();
     };
 
     function showUpdateToast() {
@@ -1103,6 +1117,39 @@
 
     function dismissUpdateToast() {
       document.getElementById('update-available-toast').classList.add('hidden');
+    }
+
+    /* Ask the Service Worker currently controlling this page which cache
+       version it's actually running (not a hardcoded guess) so the version
+       footer can flag drift between the deployed HTML and the active SW. */
+    function queryActiveCacheVersion() {
+      return new Promise((resolve) => {
+        if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) {
+          resolve(null);
+          return;
+        }
+        const channel = new MessageChannel();
+        const timeout = setTimeout(() => resolve(null), 2000);
+        channel.port1.onmessage = (event) => {
+          clearTimeout(timeout);
+          resolve((event.data && event.data.cacheVersion) || null);
+        };
+        navigator.serviceWorker.controller.postMessage({ type: 'GET_CACHE_VERSION' }, [channel.port2]);
+      });
+    }
+
+    async function renderVersionFooter() {
+      const el = document.getElementById('version-footer');
+      if (!el) return;
+      const swVersion = await queryActiveCacheVersion();
+
+      if (!swVersion || swVersion === BUILD_VERSION) {
+        el.textContent = `版本 ${BUILD_VERSION}`;
+        el.className = 'fixed bottom-1 inset-x-0 text-center text-[9px] text-[#4A4A47]/35 pointer-events-none select-none z-10';
+      } else {
+        el.textContent = `⚠ 版本不一致：頁面 ${BUILD_VERSION} ／ 快取 ${swVersion}`;
+        el.className = 'fixed bottom-1 inset-x-0 text-center text-[9px] font-bold text-amber-600 pointer-events-none select-none z-10';
+      }
     }
   </script>
 </body>

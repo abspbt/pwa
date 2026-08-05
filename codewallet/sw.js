@@ -1,5 +1,5 @@
 // Service Worker for Offline PWA Support
-const CACHE_NAME = 'barcode-pwa-v3';
+const CACHE_NAME = 'barcode-pwa-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -31,6 +31,15 @@ self.addEventListener('activate', (event) => {
       clientsList.forEach((client) => client.postMessage({ type: 'SW_UPDATED' }));
     })()
   );
+});
+
+// Answer the page's runtime version check with the cache name this exact
+// worker instance is running, so the version footer can detect drift
+// between the deployed HTML's BUILD_VERSION and the active Service Worker.
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'GET_CACHE_VERSION' && event.ports[0]) {
+    event.ports[0].postMessage({ cacheVersion: CACHE_NAME });
+  }
 });
 
 // Cache-first + stale-while-revalidate: respond from cache immediately for
