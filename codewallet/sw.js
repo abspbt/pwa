@@ -1,5 +1,5 @@
 // Service Worker for Offline PWA Support
-const CACHE_NAME = 'barcode-pwa-v1';
+const CACHE_NAME = 'barcode-pwa-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -20,23 +20,40 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(
-      keys.map((key) => {
-        if (key !== CACHE_NAME) return caches.delete(key);
-      })
-    ))
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)));
+      await self.clients.claim();
+
+      // Tell already-open pages a new version just took over, so they can
+      // prompt the user to reload instead of silently staying on stale DOM.
+      const clientsList = await self.clients.matchAll({ type: 'window' });
+      clientsList.forEach((client) => client.postMessage({ type: 'SW_UPDATED' }));
+    })()
   );
-  self.clients.claim();
 });
 
-// Network-first: always try to fetch the latest version first so the app
-// auto-updates whenever it's opened online; fall back to cache when offline.
+// Cache-first + stale-while-revalidate: respond from cache immediately for
+// instant paint (this is what makes an installed/home-screen launch fast),
+// then refresh the cache in the background so the next launch gets the
+// latest version. Falls back to network when nothing is cached yet.
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    fetch(event.request).then((networkResponse) => {
-      const clone = networkResponse.clone();
-      caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-      return networkResponse;
-    }).catch(() => caches.match(event.request))
+    caches.open(CACHE_NAME).then(async (cache) => {
+      const cached = await cache.match(event.request);
+
+      const networkFetch = fetch(event.request).then((networkResponse) => {
+        if (networkResponse && (networkResponse.ok || networkResponse.type === 'opaque')) {
+          cache.put(event.request, networkResponse.clone());
+        }
+        return networkResponse;
+      }).catch(() => cached);
+
+      event.waitUntil(networkFetch);
+
+      return cached || networkFetch;
+    })
   );
 });
