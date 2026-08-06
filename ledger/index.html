@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2E7D32">
+<meta name="app-version" content="2026.08.06.1">
+<meta name="description" content="離線可用的簡易記帳工具">
+<title>簡單記帳</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="data:image/png;base64,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">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<style>
+  :root{
+    --green:#2E7D32;
+    --green-light:#E8F5E9;
+    --red:#C62828;
+    --red-light:#FDECEA;
+    --bg:#F4F6F5;
+    --card:#FFFFFF;
+    --text:#1B1F1D;
+    --sub:#6B7570;
+    --border:#E3E7E4;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,
+      "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    padding-bottom:96px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  header.app-header{
+    background:var(--green);
+    color:#fff;
+    padding:20px 16px 56px;
+  }
+  header.app-header h1{
+    margin:0 0 4px;
+    font-size:20px;
+    font-weight:700;
+  }
+  header.app-header p{
+    margin:0;
+    font-size:13px;
+    opacity:0.85;
+  }
+  .summary{
+    margin:-40px 16px 0;
+    background:var(--card);
+    border-radius:14px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.08);
+    padding:16px;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+    min-height:84px;
+  }
+  .summary .item{text-align:center;}
+  .summary .label{font-size:12px;color:var(--sub);margin-bottom:4px;}
+  .summary .value{font-size:16px;font-weight:700;}
+  .summary .value.income{color:var(--green);}
+  .summary .value.expense{color:var(--red);}
+  main{padding:16px;max-width:640px;margin:0 auto;}
+  .filter-bar{
+    display:flex;
+    gap:8px;
+    margin:16px 0 12px;
+  }
+  .filter-bar select{
+    flex:1;
+    font-size:16px;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:var(--card);
+    color:var(--text);
+  }
+  .day-group{margin-bottom:18px;}
+  .day-group .day-label{
+    font-size:13px;
+    color:var(--sub);
+    margin:0 0 8px 4px;
+  }
+  .tx-item{
+    background:var(--card);
+    border-radius:12px;
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:8px;
+    border:1px solid var(--border);
+  }
+  .tx-item .tx-main{display:flex;align-items:center;gap:10px;min-width:0;}
+  .tx-item .tx-tag{
+    font-size:11px;
+    padding:3px 8px;
+    border-radius:20px;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  .tx-tag.income{background:var(--green-light);color:var(--green);}
+  .tx-tag.expense{background:var(--red-light);color:var(--red);}
+  .tx-item .tx-info{min-width:0;}
+  .tx-item .tx-cat{font-size:14px;font-weight:600;}
+  .tx-item .tx-note{font-size:12px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tx-item .tx-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .tx-item .tx-amount{font-size:15px;font-weight:700;}
+  .tx-amount.income{color:var(--green);}
+  .tx-amount.expense{color:var(--red);}
+  .tx-item .tx-del{
+    border:none;background:none;color:var(--sub);
+    font-size:18px;padding:4px 6px;cursor:pointer;line-height:1;
+  }
+  .empty-state{
+    text-align:center;
+    color:var(--sub);
+    padding:60px 20px;
+    font-size:14px;
+    min-height:200px;
+  }
+  .fab{
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    background:var(--green);
+    color:#fff;
+    border:none;
+    font-size:28px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.25);
+    cursor:pointer;
+    z-index:20;
+  }
+  .toolbar{
+    max-width:640px;
+    margin:4px auto 0;
+    padding:0 16px;
+    display:flex;
+    gap:8px;
+  }
+  .toolbar button{
+    flex:1;
+    font-size:13px;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:var(--card);
+    color:var(--text);
+    cursor:pointer;
+  }
+  /* Modal */
+  .modal-mask{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,0.4);
+    display:none;
+    align-items:flex-end;
+    z-index:30;
+  }
+  .modal-mask.open{display:flex;}
+  .modal{
+    background:var(--card);
+    width:100%;
+    max-width:640px;
+    margin:0 auto;
+    border-radius:16px 16px 0 0;
+    padding:20px 16px calc(20px + env(safe-area-inset-bottom));
+    max-height:88vh;
+    overflow-y:auto;
+  }
+  .modal h2{margin:0 0 16px;font-size:17px;}
+  .type-switch{display:flex;gap:8px;margin-bottom:14px;}
+  .type-switch button{
+    flex:1;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:var(--bg);
+    font-size:15px;
+    font-weight:600;
+    color:var(--sub);
+    cursor:pointer;
+  }
+  .type-switch button.active.income{background:var(--green-light);color:var(--green);border-color:var(--green);}
+  .type-switch button.active.expense{background:var(--red-light);color:var(--red);border-color:var(--red);}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:13px;color:var(--sub);margin-bottom:6px;}
+  .field input,.field select,.field textarea{
+    width:100%;
+    font-size:16px;
+    padding:11px 12px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:var(--bg);
+    color:var(--text);
+    font-family:inherit;
+  }
+  .cat-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+  }
+  .cat-grid button{
+    padding:10px 4px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:var(--bg);
+    font-size:13px;
+    color:var(--text);
+    cursor:pointer;
+  }
+  .cat-grid button.active{background:var(--green);border-color:var(--green);color:#fff;}
+  .modal-actions{display:flex;gap:10px;margin-top:6px;}
+  .modal-actions button{
+    flex:1;
+    padding:13px;
+    border-radius:10px;
+    border:none;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .btn-cancel{background:var(--bg);color:var(--sub);}
+  .btn-save{background:var(--green);color:#fff;}
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:24px;
+    transform:translateX(-50%);
+    background:#1B1F1D;
+    color:#fff;
+    padding:10px 18px;
+    border-radius:20px;
+    font-size:13px;
+    display:none;
+    z-index:40;
+    max-width:90%;
+    text-align:center;
+  }
+  .toast.show{display:block;}
+  .update-banner{
+    position:fixed;
+    top:0;left:0;right:0;
+    background:#1B1F1D;
+    color:#fff;
+    padding:10px 16px;
+    font-size:13px;
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    z-index:50;
+  }
+  .update-banner.show{display:flex;}
+  .update-banner button{
+    background:var(--green);
+    color:#fff;
+    border:none;
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:13px;
+    cursor:pointer;
+  }
+  footer.version-footer{
+    text-align:center;
+    font-size:11px;
+    color:var(--sub);
+    padding:20px 16px 8px;
+  }
+  footer.version-footer.mismatch{
+    color:#fff;
+    background:var(--red);
+    font-weight:700;
+    border-radius:8px;
+    margin:0 16px;
+    padding:10px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="update-banner" id="updateBanner">
+  <span>有新版本可用</span>
+  <button id="updateBtn">立即更新</button>
+</div>
+
+<header class="app-header">
+  <h1>簡單記帳</h1>
+  <p>離線也能記，資料只存在這台裝置上</p>
+</header>
+
+<div class="summary" id="summary">
+  <div class="item">
+    <div class="label">本月收入</div>
+    <div class="value income" id="sumIncome">$0</div>
+  </div>
+  <div class="item">
+    <div class="label">本月支出</div>
+    <div class="value expense" id="sumExpense">$0</div>
+  </div>
+  <div class="item">
+    <div class="label">總結餘</div>
+    <div class="value" id="sumBalance">$0</div>
+  </div>
+</div>
+
+<main>
+  <div class="filter-bar">
+    <select id="monthFilter"></select>
+    <select id="typeFilter">
+      <option value="all">全部</option>
+      <option value="income">收入</option>
+      <option value="expense">支出</option>
+    </select>
+  </div>
+
+  <div id="list"></div>
+</main>
+
+<div class="toolbar">
+  <button id="exportBtn">匯出備份</button>
+  <button id="importBtn">匯入備份</button>
+  <input type="file" id="importFile" accept="application/json" style="display:none;">
+</div>
+
+<footer class="version-footer" id="versionFooter">版本 2026.08.06.1</footer>
+
+<button class="fab" id="addBtn" aria-label="新增記錄">＋</button>
+
+<div class="modal-mask" id="modalMask">
+  <div class="modal">
+    <h2>新增記錄</h2>
+    <div class="type-switch">
+      <button type="button" class="active income" data-type="income">收入</button>
+      <button type="button" class="expense" data-type="expense">支出</button>
+    </div>
+    <div class="field">
+      <label for="amountInput">金額</label>
+      <input type="number" id="amountInput" inputmode="decimal" min="0" step="0.01" placeholder="0">
+    </div>
+    <div class="field">
+      <label>分類</label>
+      <div class="cat-grid" id="catGrid"></div>
+    </div>
+    <div class="field">
+      <label for="dateInput">日期</label>
+      <input type="date" id="dateInput">
+    </div>
+    <div class="field">
+      <label for="noteInput">備註（選填）</label>
+      <input type="text" id="noteInput" placeholder="例如：午餐">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="cancelBtn">取消</button>
+      <button class="btn-save" id="saveBtn">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "ledger_transactions_v1";
+  var CATEGORIES = {
+    income: ["薪資","獎金","投資","其他收入"],
+    expense: ["餐飲","交通","購物","娛樂","居家","醫療","其他支出"]
+  };
+
+  var state = {
+    type: "income",
+    category: CATEGORIES.income[0]
+  };
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }catch(e){
+      return [];
+    }
+  }
+  function save(list){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+  function uid(){
+    return Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+  }
+  function todayStr(){
+    var d = new Date();
+    var m = String(d.getMonth()+1).padStart(2,"0");
+    var day = String(d.getDate()).padStart(2,"0");
+    return d.getFullYear()+"-"+m+"-"+day;
+  }
+  function fmt(n){
+    return "$" + Number(n).toLocaleString("zh-Hant-TW",{maximumFractionDigits:2});
+  }
+  function showToast(msg){
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(function(){ t.classList.remove("show"); }, 2200);
+  }
+
+  var monthFilter = document.getElementById("monthFilter");
+  var typeFilter = document.getElementById("typeFilter");
+  var listEl = document.getElementById("list");
+
+  function buildMonthOptions(list){
+    var months = {};
+    list.forEach(function(tx){ months[tx.date.slice(0,7)] = true; });
+    var thisMonth = todayStr().slice(0,7);
+    months[thisMonth] = true;
+    var keys = Object.keys(months).sort().reverse();
+    var prevValue = monthFilter.value || thisMonth;
+    monthFilter.innerHTML = "";
+    var allOpt = document.createElement("option");
+    allOpt.value = "all";
+    allOpt.textContent = "全部月份";
+    monthFilter.appendChild(allOpt);
+    keys.forEach(function(k){
+      var opt = document.createElement("option");
+      opt.value = k;
+      var parts = k.split("-");
+      opt.textContent = parts[0] + " 年 " + parseInt(parts[1],10) + " 月";
+      monthFilter.appendChild(opt);
+    });
+    if (keys.indexOf(prevValue) !== -1 || prevValue === "all"){
+      monthFilter.value = prevValue;
+    } else {
+      monthFilter.value = thisMonth;
+    }
+  }
+
+  function render(){
+    var list = load();
+    buildMonthOptions(list);
+
+    var thisMonth = todayStr().slice(0,7);
+    var monthIncome = 0, monthExpense = 0, totalBalance = 0;
+    list.forEach(function(tx){
+      var amt = Number(tx.amount) || 0;
+      if (tx.type === "income") totalBalance += amt; else totalBalance -= amt;
+      if (tx.date.slice(0,7) === thisMonth){
+        if (tx.type === "income") monthIncome += amt; else monthExpense += amt;
+      }
+    });
+    document.getElementById("sumIncome").textContent = fmt(monthIncome);
+    document.getElementById("sumExpense").textContent = fmt(monthExpense);
+    var balEl = document.getElementById("sumBalance");
+    balEl.textContent = fmt(totalBalance);
+    balEl.style.color = totalBalance < 0 ? "var(--red)" : "var(--text)";
+
+    var mVal = monthFilter.value;
+    var tVal = typeFilter.value;
+    var filtered = list.filter(function(tx){
+      if (mVal !== "all" && tx.date.slice(0,7) !== mVal) return false;
+      if (tVal !== "all" && tx.type !== tVal) return false;
+      return true;
+    });
+    filtered.sort(function(a,b){
+      if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+      return b.createdAt - a.createdAt;
+    });
+
+    listEl.innerHTML = "";
+    if (filtered.length === 0){
+      var empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "目前沒有符合條件的記錄，點右下角「＋」新增第一筆吧";
+      listEl.appendChild(empty);
+      return;
+    }
+
+    var groups = {};
+    var order = [];
+    filtered.forEach(function(tx){
+      if (!groups[tx.date]){
+        groups[tx.date] = [];
+        order.push(tx.date);
+      }
+      groups[tx.date].push(tx);
+    });
+
+    order.forEach(function(date){
+      var groupEl = document.createElement("div");
+      groupEl.className = "day-group";
+      var label = document.createElement("div");
+      label.className = "day-label";
+      label.textContent = date;
+      groupEl.appendChild(label);
+
+      groups[date].forEach(function(tx){
+        var item = document.createElement("div");
+        item.className = "tx-item";
+        item.innerHTML =
+          '<div class="tx-main">' +
+            '<span class="tx-tag ' + tx.type + '">' + (tx.type === "income" ? "收入" : "支出") + '</span>' +
+            '<div class="tx-info">' +
+              '<div class="tx-cat">' + escapeHtml(tx.category) + '</div>' +
+              (tx.note ? '<div class="tx-note">' + escapeHtml(tx.note) + '</div>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="tx-right">' +
+            '<div class="tx-amount ' + tx.type + '">' + (tx.type === "income" ? "+" : "-") + fmt(tx.amount) + '</div>' +
+            '<button class="tx-del" data-id="' + tx.id + '" aria-label="刪除">×</button>' +
+          '</div>';
+        groupEl.appendChild(item);
+      });
+      listEl.appendChild(groupEl);
+    });
+  }
+
+  function escapeHtml(s){
+    var div = document.createElement("div");
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  listEl.addEventListener("click", function(e){
+    var btn = e.target.closest(".tx-del");
+    if (!btn) return;
+    var id = btn.getAttribute("data-id");
+    if (!confirm("確定要刪除這筆記錄嗎？")) return;
+    var list = load().filter(function(tx){ return tx.id !== id; });
+    save(list);
+    render();
+  });
+
+  monthFilter.addEventListener("change", render);
+  typeFilter.addEventListener("change", render);
+
+  // ---- 新增記錄 Modal ----
+  var modalMask = document.getElementById("modalMask");
+  var catGrid = document.getElementById("catGrid");
+  var typeSwitchBtns = document.querySelectorAll(".type-switch button");
+
+  function renderCatGrid(){
+    catGrid.innerHTML = "";
+    CATEGORIES[state.type].forEach(function(cat){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = cat;
+      if (cat === state.category) b.classList.add("active");
+      b.addEventListener("click", function(){
+        state.category = cat;
+        renderCatGrid();
+      });
+      catGrid.appendChild(b);
+    });
+  }
+
+  typeSwitchBtns.forEach(function(b){
+    b.addEventListener("click", function(){
+      typeSwitchBtns.forEach(function(x){ x.classList.remove("active"); });
+      b.classList.add("active");
+      state.type = b.getAttribute("data-type");
+      state.category = CATEGORIES[state.type][0];
+      renderCatGrid();
+    });
+  });
+
+  function openModal(){
+    document.getElementById("amountInput").value = "";
+    document.getElementById("noteInput").value = "";
+    document.getElementById("dateInput").value = todayStr();
+    state.type = "income";
+    state.category = CATEGORIES.income[0];
+    typeSwitchBtns.forEach(function(x){ x.classList.remove("active"); });
+    typeSwitchBtns[0].classList.add("active");
+    renderCatGrid();
+    modalMask.classList.add("open");
+  }
+  function closeModal(){
+    modalMask.classList.remove("open");
+  }
+
+  document.getElementById("addBtn").addEventListener("click", openModal);
+  document.getElementById("cancelBtn").addEventListener("click", closeModal);
+  modalMask.addEventListener("click", function(e){
+    if (e.target === modalMask) closeModal();
+  });
+
+  document.getElementById("saveBtn").addEventListener("click", function(){
+    var amount = parseFloat(document.getElementById("amountInput").value);
+    var date = document.getElementById("dateInput").value;
+    var note = document.getElementById("noteInput").value.trim();
+    if (!amount || amount <= 0){
+      showToast("請輸入正確的金額");
+      return;
+    }
+    if (!date){
+      showToast("請選擇日期");
+      return;
+    }
+    var list = load();
+    list.push({
+      id: uid(),
+      type: state.type,
+      amount: amount,
+      category: state.category,
+      date: date,
+      note: note,
+      createdAt: Date.now()
+    });
+    save(list);
+    closeModal();
+    render();
+    showToast("已新增");
+  });
+
+  // ---- 匯出 / 匯入 ----
+  document.getElementById("exportBtn").addEventListener("click", function(){
+    var list = load();
+    var blob = new Blob([JSON.stringify(list, null, 2)], {type:"application/json"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "ledger-backup-" + todayStr() + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("已匯出備份，記得存到雲端");
+  });
+
+  var importFile = document.getElementById("importFile");
+  document.getElementById("importBtn").addEventListener("click", function(){
+    importFile.value = "";
+    importFile.click();
+  });
+  importFile.addEventListener("change", function(){
+    var file = importFile.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      try{
+        var data = JSON.parse(reader.result);
+        if (!Array.isArray(data)) throw new Error("格式錯誤");
+        var valid = data.every(function(tx){
+          return tx && typeof tx.amount !== "undefined" && tx.date && (tx.type === "income" || tx.type === "expense");
+        });
+        if (!valid) throw new Error("格式錯誤");
+        if (!confirm("匯入將會覆蓋目前所有記錄，確定要繼續嗎？")) return;
+        data.forEach(function(tx){
+          if (!tx.id) tx.id = uid();
+          if (!tx.createdAt) tx.createdAt = Date.now();
+        });
+        save(data);
+        render();
+        showToast("匯入成功，共 " + data.length + " 筆");
+      }catch(e){
+        showToast("匯入失敗，檔案格式不正確");
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  render();
+
+  // ---- Service Worker 註冊與版本檢查 ----
+  if ("serviceWorker" in navigator){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("./sw.js").then(function(reg){
+        reg.addEventListener("updatefound", function(){
+          var newWorker = reg.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener("statechange", function(){
+            if (newWorker.state === "installed" && navigator.serviceWorker.controller){
+              document.getElementById("updateBanner").classList.add("show");
+            }
+          });
+        });
+        checkVersion(reg);
+      }).catch(function(){});
+    });
+
+    document.getElementById("updateBtn").addEventListener("click", function(){
+      location.reload();
+    });
+  }
+
+  function checkVersion(reg){
+    var sw = navigator.serviceWorker.controller;
+    if (!sw) return;
+    var channel = new MessageChannel();
+    channel.port1.onmessage = function(e){
+      var actual = e.data;
+      var declared = document.querySelector('meta[name="app-version"]').content;
+      var footer = document.getElementById("versionFooter");
+      if (actual && actual !== declared){
+        footer.textContent = "版本不一致：頁面 " + declared + " ／快取 " + actual + "（請點上方更新）";
+        footer.classList.add("mismatch");
+      } else {
+        footer.textContent = "版本 " + declared;
+      }
+    };
+    sw.postMessage("GET_VERSION", [channel.port2]);
+  }
+})();
+</script>
+</body>
+</html>
