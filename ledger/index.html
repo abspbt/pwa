@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#2E7D32">
-<meta name="app-version" content="2026.08.06.1">
+<meta name="app-version" content="2026.08.06.2">
 <meta name="description" content="離線可用的簡易記帳工具">
 <title>簡單記帳</title>
 <link rel="manifest" href="./manifest.json">
@@ -19,7 +19,7 @@
     --bg:#F4F6F5;
     --card:#FFFFFF;
     --text:#1B1F1D;
-    --sub:#6B7570;
+    --sub:#5F6E69;
     --border:#E3E7E4;
   }
   *{box-sizing:border-box;}
@@ -45,7 +45,7 @@
   header.app-header p{
     margin:0;
     font-size:13px;
-    opacity:0.85;
+    opacity:0.92;
   }
   .summary{
     margin:-40px 16px 0;
@@ -313,8 +313,8 @@
 
 <main>
   <div class="filter-bar">
-    <select id="monthFilter"></select>
-    <select id="typeFilter">
+    <select id="monthFilter" aria-label="篩選月份"></select>
+    <select id="typeFilter" aria-label="篩選收支類型">
       <option value="all">全部</option>
       <option value="income">收入</option>
       <option value="expense">支出</option>
@@ -330,7 +330,7 @@
   <input type="file" id="importFile" accept="application/json" style="display:none;">
 </div>
 
-<footer class="version-footer" id="versionFooter">版本 2026.08.06.1</footer>
+<footer class="version-footer" id="versionFooter">版本 2026.08.06.2</footer>
 
 <button class="fab" id="addBtn" aria-label="新增記錄">＋</button>
 

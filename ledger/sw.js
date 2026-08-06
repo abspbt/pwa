@@ -1,6 +1,6 @@
 // 簡單記帳 Service Worker
 // 快取策略：cache-first + stale-while-revalidate（背景更新，不擋畫面顯示）
-const CACHE_VERSION = '2026.08.06.1';
+const CACHE_VERSION = '2026.08.06.2';
 const CACHE_NAME = `ledger-${CACHE_VERSION}`;
 
 const PRECACHE_URLS = [
