@@ -21,9 +21,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   
   <!-- Barcode & QR Code Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -428,7 +426,23 @@
        CLAUDE.md "版本更新機制" for the rule; the version footer at the
        bottom of the page compares this against the Service Worker's
        actual active cache name at runtime and flags any mismatch. */
-    const BUILD_VERSION = 'barcode-pwa-v4';
+    const BUILD_VERSION = 'barcode-pwa-v5';
+
+    // 按需載入外部函式庫（同一支只會載入一次）
+    const QRCODE_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    const ZXING_SRC  = 'https://unpkg.com/@zxing/library@0.23.0/umd/index.min.js';
+    const _scriptPromises = {};
+    function loadScriptOnce(src) {
+      if (_scriptPromises[src]) return _scriptPromises[src];
+      _scriptPromises[src] = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = () => reject(new Error('載入失敗：' + src));
+        document.head.appendChild(s);
+      });
+      return _scriptPromises[src];
+    }
 
     /* Global Storage Key & Initial Preset Data */
     const STORAGE_KEY = 'pwa_barcode_wallet_v2';
@@ -619,7 +633,8 @@
         if (targetType === 'QR_CODE') {
           qrWrapper.classList.remove('hidden');
           qrCanvasContainer.innerHTML = ''; // clear previous QR Code
-          try {
+          loadScriptOnce(QRCODE_SRC).then(() => {
+            qrCanvasContainer.innerHTML = '';
             new QRCode(qrCanvasContainer, {
               text: targetValue,
               width: 150,
@@ -628,9 +643,9 @@
               colorLight : "#ffffff",
               correctLevel : QRCode.CorrectLevel.M
             });
-          } catch (e) {
+          }).catch((e) => {
             console.error("QR Code generation error:", e);
-          }
+          });
         } else {
           linearWrapper.classList.remove('hidden');
           try {
@@ -698,6 +713,9 @@
       const resultType = document.getElementById('scan-result-type');
 
       try {
+        try { await loadScriptOnce(ZXING_SRC); }
+        catch (e) { console.warn('ZXing 載入失敗，改用原生偵測器', e); }
+
         // Option A: Try ZXing BrowserMultiFormatReader
         if (window.ZXing) {
           const codeReader = new ZXing.BrowserMultiFormatReader();
