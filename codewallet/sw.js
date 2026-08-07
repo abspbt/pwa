@@ -1,10 +1,9 @@
 // Service Worker for Offline PWA Support
-const CACHE_NAME = 'barcode-pwa-v5';
+const CACHE_NAME = 'barcode-pwa-v6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  'https://cdn.tailwindcss.com',
   'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
   'https://unpkg.com/@zxing/library@0.23.0/umd/index.min.js',
