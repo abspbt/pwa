@@ -8,7 +8,7 @@
      自動清掉舊快取、接管頁面；checkForUpdate() 的輪詢會偵測到新版本並跳出
      「發現新版本」提示條，使用者按「立即更新」才會重新整理看到最新版本。
 */
-const CACHE_VERSION = '2026.08.05.4';
+const CACHE_VERSION = '2026.08.07.1';
 const CACHE_NAME = 'duey-' + CACHE_VERSION;
 
 // Google Fonts 故意不放進這裡：cache.addAll() 是全有全無，任何一個 URL
