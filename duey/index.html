@@ -432,6 +432,20 @@
     [data-theme="light"] .repeat-select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23696255' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     }
+    [data-theme="dark"] .task-name.done-text,
+    [data-theme="dark"] .task-date-label,
+    [data-theme="dark"] .repeat-chip {
+      color: #c8d0be;
+    }
+    [data-theme="dark"] .badge-done {
+      color: #ffffff;
+    }
+    [data-theme="dark"] #version-footer {
+      color: #a3ad99;
+    }
+    [data-theme="dark"] .input-hint {
+      color: #a3ad99;
+    }
     [data-theme="dark"] .repeat-select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23C1BDAE' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     }
@@ -682,8 +696,8 @@
     </div>
     <!-- 第二列：日期 + 週期 -->
     <div class="input-row2">
-      <input id="input-date" class="ifield" type="date" style="flex:1; min-width:0;" />
-      <select id="input-repeat" class="repeat-select">
+      <input id="input-date" class="ifield" type="date" style="flex:1; min-width:0;" aria-label="日期" />
+      <select id="input-repeat" class="repeat-select" aria-label="重複週期">
         <option value="none">不重複</option>
         <option value="day">每隔 N 天</option>
         <option value="week">每隔 N 週</option>
