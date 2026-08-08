@@ -760,6 +760,22 @@
     color: #d0d8c8 !important;
     opacity: 1 !important;
   }
+
+  /* Light mode: Dark taupe background + Pure white text */
+  html #input-bar #btn-add,
+  html #input-bar #btn-add * {
+    background-color: #625b52 !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+  }
+
+  /* Dark mode: Warm sand background + Dark charcoal text */
+  [data-theme="dark"] #input-bar #btn-add,
+  [data-theme="dark"] #input-bar #btn-add * {
+    background-color: #beaf9d !important;
+    color: #22211c !important;
+    opacity: 1 !important;
+  }
   </style>
 </head>
 <body>
@@ -870,7 +886,7 @@
    ║           D U E Y  v2.5               ║
    ╚═══════════════════════════════════════╝ */
 
-const APP_VERSION = '2026.08.08.2';
+const APP_VERSION = '2026.08.08.3';
 const STORAGE_KEY = 'duey_tasks_v2';
 const THEME_KEY   = 'duey_theme_v1';
 const WEEKDAYS    = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
